@@ -1,0 +1,2329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WYDOT · Turnover Prediction & Retention Decision Support</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg: #f0ece4;
+  --surface: #faf8f4;
+  --white: #ffffff;
+  --ink: #1c1a17;
+  --ink2: #4a4742;
+  --ink3: #8a8680;
+  --ink4: #c4c0b8;
+  --border: #e0dbd0;
+  --border2: #ccc7bc;
+  --wydot: #00366a;
+  --wydot2: #004f9f;
+  --wydot3: #0066cc;
+  --gold: #f4a800;
+  --gold2: #ffc940;
+  --red: #d63030;
+  --red-bg: #fdf0f0;
+  --amber: #c97b00;
+  --amber-bg: #fff8ed;
+  --green: #1a7a4a;
+  --green-bg: #f0faf5;
+  --purple: #6b35d4;
+  --purple-bg: #f4f0fd;
+  --teal: #1a7d8a;
+  --teal-bg: #f0fafb;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--ink); font-family: 'DM Sans', sans-serif; font-size: 14px; line-height: 1.6; }
+a { color: var(--wydot2); text-decoration: none; }
+
+/* ── TOP NAV ── */
+.nav {
+  background: var(--wydot);
+  padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; position: sticky; top: 0; z-index: 300;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+}
+.nav-brand { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; color: white; display: flex; align-items: center; gap: 10px; }
+.nav-badge { background: var(--gold); color: var(--wydot); font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 100px; letter-spacing: 1.5px; text-transform: uppercase; }
+.nav-tabs { display: flex; gap: 4px; }
+.nav-tab { background: transparent; border: none; color: rgba(255,255,255,0.6); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 14px; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+.nav-tab:hover { background: rgba(255,255,255,0.1); color: white; }
+.nav-tab.active { background: rgba(255,255,255,0.15); color: white; }
+
+/* ── LAYOUT ── */
+.main { max-width: 1280px; margin: 0 auto; padding: 32px 32px 80px; }
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── HERO ── */
+.hero-block {
+  background: linear-gradient(135deg, var(--wydot) 0%, var(--wydot2) 60%, #0077cc 100%);
+  border-radius: var(--radius); padding: 48px 48px 44px; margin-bottom: 32px;
+  position: relative; overflow: hidden; color: white;
+}
+.hero-block::after {
+  content: ''; position: absolute; right: -40px; top: -40px;
+  width: 320px; height: 320px; border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+}
+.hero-block::before {
+  content: 'WYDOT'; position: absolute; right: 24px; bottom: -20px;
+  font-family: 'Syne', sans-serif; font-size: 120px; font-weight: 800;
+  color: rgba(255,255,255,0.04); letter-spacing: -4px; pointer-events: none;
+}
+.hero-eyebrow { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold2); font-weight: 600; margin-bottom: 12px; }
+.hero-title { font-family: 'Syne', sans-serif; font-size: clamp(24px,3.5vw,42px); font-weight: 800; line-height: 1.1; margin-bottom: 14px; max-width: 640px; }
+.hero-sub { color: rgba(255,255,255,0.7); font-size: 15px; max-width: 560px; line-height: 1.7; margin-bottom: 28px; }
+.hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-hero { padding: 12px 24px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+.btn-primary { background: var(--gold); color: var(--wydot); }
+.btn-primary:hover { background: var(--gold2); transform: translateY(-1px); }
+.btn-outline { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); }
+.btn-outline:hover { background: rgba(255,255,255,0.18); }
+
+/* ── CARDS ── */
+.card { background: var(--white); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); margin-bottom: 20px; }
+.card-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.card-title .icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+
+/* ── GRID ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+/* ── STAT CARDS ── */
+.stat { background: var(--surface); border-radius: var(--radius-sm); padding: 18px 20px; border: 1px solid var(--border); }
+.stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink3); font-weight: 600; margin-bottom: 8px; }
+.stat-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--ink); line-height: 1; }
+.stat-sub { font-size: 12px; color: var(--ink3); margin-top: 4px; }
+
+/* ── RISK GAUGE ── */
+.risk-gauge-wrap { display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
+.risk-gauge-label { font-size: 13px; color: var(--ink3); margin-top: 8px; }
+.risk-pct { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; }
+
+/* ── THEME BARS ── */
+.theme-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.theme-bar-label { width: 160px; font-size: 12px; color: var(--ink2); flex-shrink: 0; }
+.theme-bar-track { flex: 1; height: 8px; background: var(--bg); border-radius: 100px; overflow: hidden; }
+.theme-bar-fill { height: 100%; border-radius: 100px; transition: width 0.8s ease; }
+.theme-bar-val { width: 38px; text-align: right; font-size: 12px; font-weight: 600; color: var(--ink2); }
+
+/* ── BADGES / PILLS ── */
+.risk-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; }
+.risk-pill.high { background: var(--red-bg); color: var(--red); border: 1px solid #f8c8c8; }
+.risk-pill.medium { background: var(--amber-bg); color: var(--amber); border: 1px solid #fde5b0; }
+.risk-pill.low { background: var(--green-bg); color: var(--green); border: 1px solid #b8e8d4; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* ── STRATEGY CARDS ── */
+.strategy-card {
+  background: var(--white); border-radius: var(--radius); padding: 20px;
+  border: 1px solid var(--border); border-left: 4px solid var(--wydot2);
+  margin-bottom: 12px;
+}
+.strategy-card.priority-1 { border-left-color: var(--red); }
+.strategy-card.priority-2 { border-left-color: var(--amber); }
+.strategy-card.priority-3 { border-left-color: var(--green); }
+.strategy-title { font-weight: 600; font-size: 14px; color: var(--ink); margin-bottom: 6px; }
+.strategy-meta { font-size: 12px; color: var(--ink3); }
+.strategy-theme { display: inline-block; background: var(--purple-bg); color: var(--purple); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 100px; margin-right: 6px; }
+.strategy-effectiveness { display: inline-block; background: var(--teal-bg); color: var(--teal); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 100px; }
+
+/* ── FORMS ── */
+.form-group { margin-bottom: 18px; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--ink2); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.8px; }
+.form-input, .form-select {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px;
+  color: var(--ink); background: var(--white); outline: none; transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus { border-color: var(--wydot2); box-shadow: 0 0 0 3px rgba(0,79,159,0.12); }
+.scale-row { display: flex; gap: 8px; }
+.scale-btn {
+  flex: 1; padding: 10px; border: 1px solid var(--border2); border-radius: var(--radius-sm);
+  background: var(--white); cursor: pointer; font-size: 13px; font-weight: 500;
+  color: var(--ink2); transition: all 0.12s; text-align: center;
+}
+.scale-btn.selected { background: var(--wydot2); color: white; border-color: var(--wydot2); }
+.scale-btn:hover:not(.selected) { background: var(--surface); border-color: var(--wydot2); }
+.section-divider { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--wydot); text-transform: uppercase; letter-spacing: 1.5px; padding: 20px 0 10px; border-bottom: 2px solid var(--wydot); margin-bottom: 20px; }
+
+/* ── TABLES ── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th { background: var(--surface); padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--ink3); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); text-align: left; }
+.data-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--ink2); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--surface); }
+
+/* ── UPLOAD ZONE ── */
+.upload-zone {
+  border: 2px dashed var(--border2); border-radius: var(--radius); padding: 56px 40px;
+  text-align: center; cursor: pointer; transition: all 0.2s; background: var(--surface);
+  position: relative;
+}
+.upload-zone:hover, .upload-zone.drag-over { border-color: var(--wydot2); background: rgba(0,79,159,0.04); }
+.upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.upload-icon { font-size: 40px; margin-bottom: 12px; }
+.upload-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+.upload-sub { color: var(--ink3); font-size: 13px; }
+
+/* ── CHATBOT ── */
+.chat-container { display: flex; flex-direction: column; height: 600px; background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+.chat-header { background: var(--wydot); color: white; padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
+.chat-avatar { width: 36px; height: 36px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: var(--wydot); }
+.chat-header-info .name { font-weight: 600; font-size: 14px; }
+.chat-header-info .status { font-size: 12px; color: rgba(255,255,255,0.6); }
+.chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.msg { display: flex; gap: 10px; max-width: 85%; }
+.msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.msg-bubble { padding: 12px 16px; border-radius: 14px; font-size: 14px; line-height: 1.6; }
+.msg.ai .msg-bubble { background: var(--surface); border: 1px solid var(--border); color: var(--ink); border-radius: 2px 14px 14px 14px; }
+.msg.user .msg-bubble { background: var(--wydot2); color: white; border-radius: 14px 2px 14px 14px; }
+.msg-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.msg.ai .msg-avatar { background: var(--wydot); color: white; }
+.msg.user .msg-avatar { background: var(--ink3); color: white; }
+.chat-input-row { display: flex; gap: 10px; padding: 16px 20px; border-top: 1px solid var(--border); background: var(--surface); }
+.chat-input { flex: 1; padding: 10px 14px; border: 1px solid var(--border2); border-radius: 24px; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; background: white; }
+.chat-input:focus { border-color: var(--wydot2); }
+.chat-send-btn { background: var(--wydot2); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
+.chat-send-btn:hover { background: var(--wydot); }
+.chat-quick-btns { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 20px 12px; }
+.quick-btn { background: white; border: 1px solid var(--border2); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 500; color: var(--ink2); cursor: pointer; transition: all 0.12s; }
+.quick-btn:hover { background: var(--wydot2); color: white; border-color: var(--wydot2); }
+
+/* ── LOADING OVERLAY ── */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 500; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+.overlay.show { display: flex; }
+.spinner { width: 48px; height: 48px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.overlay-text { color: white; font-weight: 500; font-size: 15px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+.btn-blue { background: var(--wydot2); color: white; }
+.btn-blue:hover { background: var(--wydot); }
+.btn-ghost { background: transparent; color: var(--ink2); border: 1px solid var(--border2); }
+.btn-ghost:hover { background: var(--surface); }
+.btn-sm { padding: 6px 14px; font-size: 13px; }
+
+/* ── FACTOR CHIPS ── */
+.factor-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.factor-chip { background: var(--red-bg); color: var(--red); border: 1px solid #f4c0c0; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 600; }
+.factor-chip.medium { background: var(--amber-bg); color: var(--amber); border-color: #f8dba0; }
+.factor-chip.low { background: var(--green-bg); color: var(--green); border-color: #b8e8d4; }
+
+/* ── SYSTEM INFO BOX ── */
+.info-box { background: rgba(0,79,159,0.06); border: 1px solid rgba(0,79,159,0.15); border-radius: var(--radius-sm); padding: 16px; font-size: 13px; color: var(--ink2); line-height: 1.7; }
+.info-box strong { color: var(--wydot2); }
+
+/* ── FEATURE CARDS ── */
+.feature-card { background: var(--white); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
+.feature-icon { font-size: 28px; }
+.feature-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--ink); }
+.feature-desc { font-size: 13px; color: var(--ink3); line-height: 1.6; }
+
+/* ── SECTION HEADING ── */
+.section-head { margin-bottom: 20px; }
+.section-head h2 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--ink); }
+.section-head p { font-size: 13px; color: var(--ink3); margin-top: 4px; }
+
+/* ── RESULT SECTION ── */
+.result-section { display: none; }
+.result-section.show { display: block; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .main { padding: 20px; }
+  .hero-block { padding: 32px 24px; }
+}
+
+/* ── HIGHLIGHT ── */
+.highlight-num { color: var(--wydot2); font-weight: 700; }
+.text-danger { color: var(--red); font-weight: 600; }
+.text-success { color: var(--green); font-weight: 600; }
+.text-warn { color: var(--amber); font-weight: 600; }
+
+/* ── PROGRESS BAR ── */
+.progress-steps { display: flex; gap: 0; margin-bottom: 28px; }
+.progress-step { flex: 1; padding: 12px 16px; background: var(--surface); border-right: 1px solid var(--border); font-size: 12px; color: var(--ink3); font-weight: 500; }
+.progress-step:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.progress-step:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; border-right: none; }
+.progress-step.active { background: var(--wydot2); color: white; }
+.progress-step.done { background: var(--green-bg); color: var(--green); }
+
+/* ── TOOLTIP HELPER ── */
+.helper-text { font-size: 11px; color: var(--ink3); margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ── LOADING OVERLAY ── -->
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+  <p class="overlay-text" id="overlay-text">Analyzing employee data...</p>
+</div>
+
+<!-- ── TOP NAV ── -->
+<nav class="nav">
+  <div class="nav-brand">
+    <span>WYDOT</span>
+    <span class="nav-badge">HR AI</span>
+    <span style="font-weight:300;color:rgba(255,255,255,0.4);font-size:14px;margin-left:4px">· Turnover Prediction System</span>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('home')">Home</button>
+    <button class="nav-tab" onclick="showPage('single')">Single Employee</button>
+    <button class="nav-tab" onclick="showPage('batch')">Batch Upload</button>
+    <button class="nav-tab" onclick="showPage('dashboard')">Dashboard</button>
+    <button class="nav-tab" onclick="showPage('chatbot')">AI Assistant</button>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+<!-- ══════════════════════════════════════════════
+     PAGE: HOME
+══════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+  <div class="hero-block">
+    <p class="hero-eyebrow">Wyoming Department of Transportation · HR Decision Support</p>
+    <h1 class="hero-title">Predict Turnover.<br>Retain Talent. Act Early.</h1>
+    <p class="hero-sub">An AI-powered system that predicts employee turnover risk, identifies the root-cause themes, and recommends evidence-based retention strategies — built from real WYDOT exit survey and stayer data.</p>
+    <div class="hero-btns">
+      <button class="btn-hero btn-primary" onclick="showPage('single')">Analyze Single Employee</button>
+      <button class="btn-hero btn-outline" onclick="showPage('batch')">Upload Batch Survey File</button>
+      <button class="btn-hero btn-outline" onclick="showPage('chatbot')">Ask AI Assistant</button>
+    </div>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:24px">
+    <div class="stat">
+      <div class="stat-label">Leavers in Training Data</div>
+      <div class="stat-value">307</div>
+      <div class="stat-sub">WYDOT exit survey responses</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Stayers in Training Data</div>
+      <div class="stat-value">300</div>
+      <div class="stat-sub">Current employee profiles</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Predictive Features</div>
+      <div class="stat-value">32</div>
+      <div class="stat-sub">Survey items across 8 themes</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Retention Strategies</div>
+      <div class="stat-value">102</div>
+      <div class="stat-sub">Across 32 peer state DOTs</div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <div class="feature-title">Turnover Risk Score</div>
+      <div class="feature-desc">Generates a 0–100% probability that an employee may leave, using a logistic regression model trained on WYDOT exit and stayer survey data. Includes low/medium/high risk categories.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔍</div>
+      <div class="feature-title">Theme Diagnostic</div>
+      <div class="feature-desc">Identifies which of 8 HR themes (compensation, career, leadership, training, culture, safety, working conditions, work-life balance) is the primary driver of risk for that employee.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💡</div>
+      <div class="feature-title">Strategy Recommendations</div>
+      <div class="feature-desc">Maps risk themes to the most effective retention strategies from the national DOT HR survey and the WYDOT Strategy Finder — ranked by evidence-based effectiveness scores.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Batch Analytics Dashboard</div>
+      <div class="feature-desc">Upload a pulse survey Excel file for multiple employees. Get aggregated risk distribution, highest-risk employees, top themes, and organizational intervention priorities.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🤖</div>
+      <div class="feature-title">AI Chat Assistant</div>
+      <div class="feature-desc">Ask questions in natural language: "Why is this employee at high risk?", "What themes are most common?", "What should HR do this month?" — powered by Claude AI with WYDOT data grounding.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📋</div>
+      <div class="feature-title">Explainable AI</div>
+      <div class="feature-desc">Every prediction comes with transparent factor-level explanations — showing which survey items drove the risk score — so HR can trust and act on the recommendations.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE: SINGLE EMPLOYEE
+══════════════════════════════════════════════ -->
+<div class="page" id="page-single">
+  <div class="section-head">
+    <h2>Single Employee Pulse Survey</h2>
+    <p>Enter survey responses for one employee to generate a turnover risk prediction and retention strategy recommendations.</p>
+  </div>
+
+  <div class="info-box" style="margin-bottom:20px">
+    <strong>How this works:</strong> Rate each item from <strong>1 = Poor</strong> to <strong>4 = Excellent</strong>. Low scores (1–2) flag risk areas. The system uses a logistic regression model trained on 607 WYDOT employee records (307 leavers + 300 stayers) to compute turnover risk probability and identify the most problematic themes.
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <!-- FORM -->
+      <div class="card">
+        <div id="survey-form">
+
+          <div class="info-box" style="margin-bottom:16px;font-size:12px">
+            <strong>Rating scale (all items):</strong> &nbsp;
+            <span style="color:#d63030;font-weight:700;">1 = Poor / Strongly Disagree</span> &nbsp;&#8594;&nbsp;
+            <span style="color:#c97b00;font-weight:700;">2 = Fair / Disagree</span> &nbsp;&#8594;&nbsp;
+            <span style="color:#0891b2;font-weight:700;">3 = Good / Agree</span> &nbsp;&#8594;&nbsp;
+            <span style="color:#1a7a4a;font-weight:700;">4 = Excellent / Strongly Agree</span><br>
+            <span style="color:var(--ink3)">Low ratings (1–2) flag risk areas and drive the turnover risk score upward.</span>
+          </div>
+
+          <div class="section-divider">🏢 Work Culture &amp; Team <span style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.7)">— Scale: 1=Best, 4=Worst</span></div>
+          <div class="form-group">
+            <label class="form-label">Cooperation within your department/program</label>
+            <div class="scale-row" data-field="coop_dept">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button>
+              <button class="scale-btn" data-val="2">2 &mdash; Fair</button>
+              <button class="scale-btn" data-val="3">3 &mdash; Good</button>
+              <button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cooperation with other departments/programs</label>
+            <div class="scale-row" data-field="coop_other">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Members of my team worked well together</label>
+            <div class="scale-row" data-field="team">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">I believed I was treated as a valuable member of WYDOT</label>
+            <div class="scale-row" data-field="valued">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+
+          <div class="section-divider">💰 Compensation &amp; Career <span style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.7)">— Scale: 1=Best, 4=Worst</span></div>
+          <div class="form-group">
+            <label class="form-label">Rate of pay for your job</label>
+            <div class="scale-row" data-field="pay">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button>
+              <button class="scale-btn" data-val="2">2 &mdash; Fair</button>
+              <button class="scale-btn" data-val="3">3 &mdash; Good</button>
+              <button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Career development / advancement opportunities</label>
+            <div class="scale-row" data-field="career">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button>
+              <button class="scale-btn" data-val="2">2 &mdash; Fair</button>
+              <button class="scale-btn" data-val="3">3 &mdash; Good</button>
+              <button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">WYDOT's performance review system (PMI)</label>
+            <div class="scale-row" data-field="pmi">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button>
+              <button class="scale-btn" data-val="2">2 &mdash; Fair</button>
+              <button class="scale-btn" data-val="3">3 &mdash; Good</button>
+              <button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">My supervisor provided recognition / appreciated my work</label>
+            <div class="scale-row" data-field="recognition">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+
+          <div class="section-divider">👔 Supervisor / Leadership <span style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.7)">— Scale: 1=Best, 4=Worst</span></div>
+          <div class="form-group">
+            <label class="form-label">My immediate supervisor let me know when I was doing a good job</label>
+            <div class="scale-row" data-field="sup_feedback">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">I felt free to suggest improvements to my supervisor</label>
+            <div class="scale-row" data-field="sup_suggest">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">If I had questions or concerns I felt comfortable speaking with my immediate supervisor</label>
+            <div class="scale-row" data-field="sup_comfort">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Employee problems and complaints were resolved promptly in my department</label>
+            <div class="scale-row" data-field="complaints">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">My supervisor was sensitive to employees' needs</label>
+            <div class="scale-row" data-field="sup_sensitive">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">My supervisor was receptive to open communication</label>
+            <div class="scale-row" data-field="sup_comm">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">I felt comfortable speaking with upper management</label>
+            <div class="scale-row" data-field="upper_mgmt">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+
+          <div class="section-divider">📚 Training &amp; Development <span style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.7)">— Scale: 1=Best, 4=Worst</span></div>
+          <div class="form-group">
+            <label class="form-label">Personal job training provided</label>
+            <div class="scale-row" data-field="job_training">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Training programs (formal, organizational)</label>
+            <div class="scale-row" data-field="training_prog">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">I received proper training to perform my job effectively</label>
+            <div class="scale-row" data-field="proper_training">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+
+          <div class="section-divider">🏗️ Working Conditions &amp; Resources <span style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.7)">— Scale: 1=Best, 4=Worst</span></div>
+          <div class="form-group">
+            <label class="form-label">Equipment, materials, resources, and facilities provided</label>
+            <div class="scale-row" data-field="resources">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Physical working conditions</label>
+            <div class="scale-row" data-field="phys_conditions">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">My job duties and responsibilities were clearly defined</label>
+            <div class="scale-row" data-field="clarity">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ability to get the resources needed to do my job</label>
+            <div class="scale-row" data-field="get_resources">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+
+          <div class="section-divider">🦺 Safety &amp; Job Security <span style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.7)">— Scale: 1=Best, 4=Worst</span></div>
+          <div class="form-group">
+            <label class="form-label">I felt WYDOT supported a culture of safety</label>
+            <div class="scale-row" data-field="safety_culture">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">My supervisor provided an environment of safety</label>
+            <div class="scale-row" data-field="safety_sup">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">I felt that WYDOT provided me with job security</label>
+            <div class="scale-row" data-field="job_security">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+
+          <div class="section-divider">📢 Communication &amp; Information <span style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.7)">— Scale: 1=Best, 4=Worst</span></div>
+          <div class="form-group">
+            <label class="form-label">I was kept well-informed about department policies and procedures</label>
+            <div class="scale-row" data-field="informed">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">My supervisor followed WYDOT policies</label>
+            <div class="scale-row" data-field="sup_policy">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">I felt comfortable speaking with Human Resources</label>
+            <div class="scale-row" data-field="hr_comfort">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">My supervisor demonstrated fair and equal treatment</label>
+            <div class="scale-row" data-field="fairness">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">My supervisor developed cooperation and teamwork</label>
+            <div class="scale-row" data-field="sup_teamwork">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Resolved complaints &amp; problems effectively</label>
+            <div class="scale-row" data-field="resolve_problems">
+              <button class="scale-btn" data-val="1">1 &mdash; Poor</button><button class="scale-btn" data-val="2">2 &mdash; Fair</button><button class="scale-btn" data-val="3">3 &mdash; Good</button><button class="scale-btn" data-val="4">4 &mdash; Excellent</button>
+            </div>
+          </div>
+
+          <button class="btn btn-blue" style="width:100%;justify-content:center;padding:14px;font-size:15px;margin-top:8px" onclick="runSinglePrediction()">
+            🔍 Predict Turnover Risk
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS PANEL -->
+    <div>
+      <div id="single-placeholder" class="card" style="text-align:center;padding:60px 20px">
+        <div style="font-size:48px;margin-bottom:12px">📋</div>
+        <div style="font-size:16px;font-weight:600;color:var(--ink);margin-bottom:8px">Complete the survey form</div>
+        <div style="color:var(--ink3);font-size:13px">Rate each item on the left to generate a<br>turnover risk prediction and recommendations.</div>
+      </div>
+
+      <div id="single-results" class="result-section">
+        <!-- Risk Gauge -->
+        <div class="card" id="result-risk-card">
+          <div class="card-title"><div class="icon" style="background:#fdf0f0">🎯</div> Turnover Risk Assessment</div>
+          <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+            <div>
+              <div class="risk-gauge-wrap">
+                <svg width="160" height="160" viewBox="0 0 160 160">
+                  <circle cx="80" cy="80" r="62" fill="none" stroke="#f0ece4" stroke-width="14"/>
+                  <circle cx="80" cy="80" r="62" fill="none" stroke="#e0dbd0" stroke-width="14"
+                    stroke-dasharray="389.6" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 80 80)"/>
+                  <circle id="gauge-arc" cx="80" cy="80" r="62" fill="none" stroke="#d63030" stroke-width="14"
+                    stroke-dasharray="389.6" stroke-dashoffset="389.6" stroke-linecap="round" transform="rotate(-90 80 80)"
+                    style="transition: stroke-dashoffset 1.2s ease, stroke 0.5s"/>
+                  <text id="gauge-pct" x="80" y="74" text-anchor="middle" font-family="Syne,sans-serif" font-size="28" font-weight="800" fill="#1c1a17">--%</text>
+                  <text id="gauge-cat" x="80" y="96" text-anchor="middle" font-size="11" fill="#8a8680">RISK LEVEL</text>
+                </svg>
+              </div>
+            </div>
+            <div style="flex:1">
+              <div id="risk-pill-wrap" style="margin-bottom:12px"></div>
+              <div id="risk-explanation" style="font-size:13px;color:var(--ink2);line-height:1.7"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Theme Scores -->
+        <div class="card">
+          <div class="card-title"><div class="icon" style="background:#f4f0fd">📊</div> Theme-Level Diagnostic Scores</div>
+          <p style="font-size:12px;color:var(--ink3);margin-bottom:16px">Lower scores = higher risk from that theme. Scores are the average of survey items within that domain (1 = highest concern, 4 = no concern).</p>
+          <div id="theme-bars"></div>
+        </div>
+
+        <!-- Key Risk Factors -->
+        <div class="card">
+          <div class="card-title"><div class="icon" style="background:#fdf0f0">⚠️</div> Top Risk Factors</div>
+          <p style="font-size:12px;color:var(--ink3);margin-bottom:14px">Survey items rated lowest — these are the most likely contributors to turnover risk for this employee.</p>
+          <div id="risk-factors" class="factor-chips"></div>
+        </div>
+
+        <!-- Strategies -->
+        <div class="card">
+          <div class="card-title"><div class="icon" style="background:#f0faf5">💡</div> Recommended Retention Strategies</div>
+          <div id="strategies-list"></div>
+        </div>
+
+        <!-- Action Plan -->
+        <div class="card">
+          <div class="card-title"><div class="icon" style="background:#fff8ed">📌</div> Suggested HR Action Priority</div>
+          <div id="action-plan" style="font-size:13px;color:var(--ink2);line-height:1.8"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE: BATCH UPLOAD
+══════════════════════════════════════════════ -->
+<div class="page" id="page-batch">
+  <div class="section-head">
+    <h2>Batch Employee File Upload</h2>
+    <p>Upload an Excel file containing multiple employee pulse survey responses. The system will predict turnover risk for each employee, identify top themes, and generate organizational intervention priorities.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-title"><div class="icon" style="background:#f0faf5">📁</div> Upload Pulse Survey File</div>
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+      <input type="file" id="file-input" accept=".xlsx,.xls,.csv" onchange="handleFileUpload(this)" style="display:none">
+      <div class="upload-icon">📊</div>
+      <div class="upload-title">Drop Excel File Here</div>
+      <div class="upload-sub">Accepts .xlsx, .xls, or .csv · Must include the 32 survey item columns<br>
+      <a href="#" onclick="downloadTemplate()">Download template format</a></div>
+    </div>
+    <div class="info-box" style="margin-top:16px">
+      <strong>Expected columns:</strong> The Excel file must contain the same 32 survey items used in the single-employee form (cooperation, pay, career, supervisor, training, safety, etc.). Each row = one employee. An optional <strong>EmployeeID</strong> or <strong>Name</strong> column can be included for identification. The system will auto-map column names to the survey fields.
+    </div>
+  </div>
+
+  <!-- Batch Results -->
+  <div id="batch-results" class="result-section">
+    <!-- Summary Stats -->
+    <div class="grid-4" style="margin-bottom:20px" id="batch-stat-cards"></div>
+
+    <!-- Charts Row -->
+    <div class="grid-2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:#f4f0fd">📊</div> Risk Distribution</div>
+        <canvas id="risk-dist-chart" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:#fdf0f0">🔥</div> Theme Risk Heatmap</div>
+        <div id="batch-theme-bars"></div>
+      </div>
+    </div>
+
+    <!-- High Risk Employees Table -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title"><div class="icon" style="background:#fdf0f0">🚨</div> High-Risk Employee List</div>
+      <div style="overflow-x:auto">
+        <table class="data-table" id="batch-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Employee ID</th><th>Risk Score</th><th>Risk Level</th><th>Top Theme</th><th>Primary Factor</th><th>Priority</th>
+            </tr>
+          </thead>
+          <tbody id="batch-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Org-Level Strategies -->
+    <div class="card">
+      <div class="card-title"><div class="icon" style="background:#f0faf5">🏛️</div> Organizational Intervention Priorities</div>
+      <p style="font-size:12px;color:var(--ink3);margin-bottom:16px">Strategies ranked by frequency — most frequently recommended across high-risk employees appear first.</p>
+      <div id="org-strategies"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE: DASHBOARD
+══════════════════════════════════════════════ -->
+<div class="page" id="page-dashboard">
+  <div class="section-head">
+    <h2>HR Analytics Dashboard</h2>
+    <p>Organization-wide turnover risk summary based on WYDOT exit survey data and stayer profiles.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:24px">
+    <div class="stat">
+      <div class="stat-label">Top Risk Theme (Leavers)</div>
+      <div class="stat-value" style="font-size:16px;margin-top:4px">Compensation</div>
+      <div class="stat-sub">UI score 2.36/4.0 — lowest satisfaction score</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Strongest Predictor</div>
+      <div class="stat-value" style="font-size:16px;margin-top:4px">Supervisor Comm.</div>
+      <div class="stat-sub">Largest leaver/stayer gap (+0.30)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">#1 Leaving Reason</div>
+      <div class="stat-value" style="font-size:16px;margin-top:4px">Pay/Salary</div>
+      <div class="stat-sub">17 of 31 national DOTs cited this</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Top Strategy (32 DOTs)</div>
+      <div class="stat-value" style="font-size:14px;margin-top:4px">Training &amp; Dev</div>
+      <div class="stat-sub">25 DOTs implement — most adopted nationally</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:20px">
+    <div class="card">
+      <div class="card-title"><div class="icon" style="background:#fdf0f0">⚠️</div> Top Leaving Reasons (National DOT Data)</div>
+      <div id="leaving-reasons-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon" style="background:#f0faf5">✅</div> Top Retention Strategies (National DOT Data)</div>
+      <div id="retention-strategy-bars"></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><div class="icon" style="background:#f4f0fd">📈</div> WYDOT Exit Survey — Theme Risk Signals (Leavers, n=307)</div>
+      <p style="font-size:12px;color:var(--ink3);margin-bottom:14px">Unified risk signal per theme (0–3 scale, higher = more risk). Rating items converted as 4−mean; Agreement items used directly as mean−1. Sorted highest risk first.</p>
+      <div id="exit-theme-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon" style="background:#f0faf5">🟢</div> WYDOT Stayers — Theme Risk Signals (Current Employees, n=300)</div>
+      <p style="font-size:12px;color:var(--ink3);margin-bottom:14px">Same 1=Poor → 4=Excellent scale. Stayers generally score higher (more satisfied). Compare with leavers to see where WYDOT retains well vs. where gaps drive attrition. Source: Stayer Profile (n=250).</p>
+      <div id="stayer-theme-bars"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE: CHATBOT
+══════════════════════════════════════════════ -->
+<div class="page" id="page-chatbot">
+  <div class="section-head">
+    <h2>AI HR Decision Support Assistant</h2>
+    <p>Ask questions about turnover risk, retention strategies, and employee data in natural language — powered by Claude AI with WYDOT-specific knowledge grounding.</p>
+  </div>
+
+  <div class="grid-2" style="align-items:start">
+    <div>
+      <div class="chat-container">
+        <div class="chat-header">
+          <div class="chat-avatar">W</div>
+          <div class="chat-header-info">
+            <div class="name">WYDOT HR Assistant</div>
+            <div class="status">Powered by Claude AI · WYDOT data-grounded</div>
+          </div>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <div class="msg ai">
+            <div class="msg-avatar">W</div>
+            <div class="msg-bubble">
+              Hello! I'm the WYDOT HR Decision Support Assistant. I have knowledge of WYDOT exit survey data (307 leavers), stayer profiles (300 current employees), and national DOT retention strategies.<br><br>
+              I can help you:<br>
+              • Understand turnover risk factors<br>
+              • Identify which themes are most problematic<br>
+              • Recommend evidence-based retention strategies<br>
+              • Explain what the data means for HR action<br><br>
+              What would you like to know?
+            </div>
+          </div>
+        </div>
+        <div class="chat-quick-btns" id="quick-btns">
+          <button class="quick-btn" onclick="sendQuick('What are the top reasons WYDOT employees leave?')">Top leaving reasons</button>
+          <button class="quick-btn" onclick="sendQuick('Which retention strategies are most effective?')">Best strategies</button>
+          <button class="quick-btn" onclick="sendQuick('What themes most differentiate leavers from stayers?')">Leaver vs stayer differences</button>
+          <button class="quick-btn" onclick="sendQuick('What should HR prioritize this quarter to reduce turnover?')">HR priorities</button>
+          <button class="quick-btn" onclick="sendQuick('Explain how the turnover risk model works')">How the model works</button>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-input" type="text" id="chat-input" placeholder="Ask about turnover risk, strategies, or WYDOT data..." onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="chat-send-btn" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:#f4f0fd">🤖</div> What This Assistant Knows</div>
+        <div class="info-box" style="margin-bottom:16px">
+          The AI assistant is grounded in WYDOT-specific data and national DOT research. It can answer questions at both the individual and organizational level.
+        </div>
+        <div style="font-size:13px;color:var(--ink2);line-height:1.9">
+          <strong>Data sources embedded:</strong><br>
+          • 307 WYDOT exit survey records (32 survey items each)<br>
+          • 300 WYDOT stayer profiles (same 32 items)<br>
+          • National DOT HR survey (31 DOTs, 43 variables)<br>
+          • Top leaving reasons with frequency counts<br>
+          • Top retention strategies with effectiveness scores<br>
+          • Theme-to-strategy mapping rules<br><br>
+          <strong>Example questions it can answer:</strong><br>
+          • "Why do WYDOT employees leave?"<br>
+          • "Which themes separate leavers from stayers?"<br>
+          • "What are the most effective DOT retention strategies?"<br>
+          • "If an employee scores low on supervisor questions, what should HR do?"<br>
+          • "Summarize the compensation theme data for WYDOT"<br>
+          • "What is the model accuracy and how does it work?"
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:#fff8ed">⚙️</div> AI Assistant — API Setup</div>
+
+        <!-- Google OAuth option -->
+        <div style="background:var(--surface);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--border);margin-bottom:14px">
+          <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px">Option 1 — Google AI Studio (Free via Google Account)</div>
+          <div style="font-size:12px;color:var(--ink3);margin-bottom:10px">Use your Google account to access Google Gemini API. Free tier available at <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--wydot2)">aistudio.google.com</a> — sign in → Get API Key → copy it here.</div>
+          <div class="form-group" style="margin-bottom:10px">
+            <label class="form-label">Google AI (Gemini) API Key</label>
+            <input class="form-input" type="password" id="google-key-input" placeholder="AIza...">
+          </div>
+          <button class="btn btn-blue btn-sm" onclick="saveGoogleKey()">Use Google AI Key</button>
+          <span id="google-key-status" style="font-size:12px;color:var(--green);margin-left:10px"></span>
+        </div>
+
+        <!-- Anthropic key option -->
+        <div style="background:var(--surface);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--border)">
+          <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px">Option 2 — Anthropic API (Claude)</div>
+          <div style="font-size:12px;color:var(--ink3);margin-bottom:10px">Get a key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--wydot2)">console.anthropic.com</a> → API Keys → Create Key. Starts with <code>sk-ant-</code>. Pay-as-you-go, ~$0.01 per conversation.</div>
+          <div class="form-group" style="margin-bottom:10px">
+            <label class="form-label">Anthropic API Key</label>
+            <input class="form-input" type="password" id="api-key-input" placeholder="sk-ant-...">
+          </div>
+          <button class="btn btn-blue btn-sm" onclick="saveApiKey()">Use Anthropic Key</button>
+          <span id="api-key-status" style="font-size:12px;color:var(--green);margin-left:10px"></span>
+        </div>
+
+        <div class="info-box" style="margin-top:12px;font-size:11px">
+          Keys are stored in your browser's local storage only. They are never sent anywhere except directly to the respective AI provider when you send a message.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="page" id="page-blueprint" style="display:none!important">
+  <div class="section-head">
+    <h2>Full System Blueprint</h2>
+    <p>Technical architecture, data methodology, model design, and implementation roadmap for the WYDOT Turnover Prediction & Retention Decision Support System.</p>
+  </div>
+
+  <div style="max-width:900px">
+
+  <!-- Executive Summary -->
+  <div class="card">
+    <div class="card-title" style="font-size:18px"><div class="icon" style="background:#e8f0fe">📋</div> Executive Summary</div>
+    <p style="color:var(--ink2);line-height:1.8;font-size:14px">
+      The WYDOT Turnover Prediction & Retention Decision Support System is a machine-learning–powered HR tool that ingests employee pulse survey data and produces three outputs per employee: (1) a <strong>turnover risk probability</strong> from a logistic regression model trained on 607 WYDOT records, (2) a <strong>theme-level diagnostic</strong> across 8 HR domains, and (3) <strong>evidence-based retention strategy recommendations</strong> mapped from national DOT HR research.
+      <br><br>
+      The MVP is built as a single self-contained HTML application using pure JavaScript with SHAP-analogous linear weight attribution. The production version is designed as a FastAPI + React + PostgreSQL system with a Claude-powered chatbot. Both versions support individual employee analysis and batch Excel upload workflows.
+    </p>
+  </div>
+
+  <!-- A. Problem Framing -->
+  <div class="card">
+    <div class="card-title" style="font-size:18px"><div class="icon" style="background:#fdf0f0">A</div> Problem Framing</div>
+    <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:0 0 10px">Business Problem</h3>
+    <p style="font-size:13px;color:var(--ink2);line-height:1.8;margin-bottom:16px">WYDOT faces workforce turnover that is costly, operationally disruptive, and concentrated in specific themes (pay competitiveness, supervisor relationships, career growth). HR lacks a systematic, data-driven tool to identify at-risk employees early and prescribe targeted interventions before employees decide to leave.</p>
+
+    <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:0 0 10px">ML Problem Definition</h3>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.8">
+      <strong>Layer 1 — Binary Classification:</strong> Given 32 survey responses, predict P(leave) vs P(stay). Target variable: <code>left=1</code> (exit survey records), <code>left=0</code> (stayer records).<br>
+      <strong>Layer 2 — Theme Attribution:</strong> Compute grouped theme scores; identify which theme has the lowest average score (= most concerning domain for that employee).<br>
+      <strong>Layer 3 — Strategy Recommendation:</strong> Rule-based mapping from identified risk theme → ranked retention strategies from national DOT survey, filtered by effectiveness score.
+    </div>
+  </div>
+
+  <!-- B. Data Architecture -->
+  <div class="card">
+    <div class="card-title" style="font-size:18px"><div class="icon" style="background:#f4f0fd">B</div> Data Architecture &amp; Integration</div>
+
+    <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:0 0 10px">Dataset Integration</h3>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.8;margin-bottom:16px">
+      <strong>Exit Survey (n=307):</strong> 32 Likert-scale survey items + <code>Turnover_Type_Final</code> + <code>Whatareyourreasonsforleavingwydot</code>. Label: <code>left=1</code>. Note: <code>Turnover_Type_Final</code> and <code>Whatareyourreasonsforleavingwydot</code> are excluded from features (data leakage).<br><br>
+      <strong>Stayer Dataset (n=300):</strong> Same 32 survey items + <code>Employment_Status</code> column (confirm active). <code>Whatareyourreasonsforleavingwydot</code> is simulated/null for stayers. Label: <code>left=0</code>.<br><br>
+      <strong>Combined Dataset (n=607):</strong> Vertically concatenate both; align on shared 32 feature columns; add binary label column. Near-balanced dataset (51% leavers / 49% stayers) — minimal class imbalance concern.<br><br>
+      <strong>National DOT Survey:</strong> Used exclusively as strategy knowledge base. Not used as ML training data. Maps themes to retention strategies with effectiveness scores (1–4 Likert mean across 31 DOTs).
+    </div>
+
+    <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:0 0 10px">Feature Engineering — 8 Theme Groups</h3>
+    <div style="overflow-x:auto">
+      <table class="data-table" style="font-size:12px">
+        <thead><tr><th>Theme</th><th>Survey Items Included</th><th>Score Calculation</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Compensation &amp; Career</strong></td><td>Pay, Career development, PMI review, Recognition</td><td>Mean of 4 items</td></tr>
+          <tr><td><strong>Supervisor / Leadership</strong></td><td>Supervisor feedback, free to suggest, comfort with supervisor, complaint resolution, sensitive, communication, receptive</td><td>Mean of 7 items</td></tr>
+          <tr><td><strong>Training &amp; Development</strong></td><td>Personal job training, training programs, proper training to perform job</td><td>Mean of 3 items</td></tr>
+          <tr><td><strong>Work Culture &amp; Team</strong></td><td>Cooperation within dept, cooperation with other depts, team worked well, treated as valuable member</td><td>Mean of 4 items</td></tr>
+          <tr><td><strong>Working Conditions</strong></td><td>Equipment/resources/facilities, physical conditions, job duties clarity, get resources</td><td>Mean of 4 items</td></tr>
+          <tr><td><strong>Safety</strong></td><td>Safety culture, supervisor safety environment</td><td>Mean of 2 items</td></tr>
+          <tr><td><strong>Job Security</strong></td><td>Job security feeling</td><td>Single item</td></tr>
+          <tr><td><strong>Communication / HR</strong></td><td>Informed of policies, comfort with HR, supervisor policy compliance, fairness/equal treatment, teamwork development, resolve problems</td><td>Mean of 6 items</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:16px 0 10px">Missing Value Handling</h3>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.8">
+      Impute missing Likert items with the <strong>column median</strong> from the training set (robust to outliers, preserves scale range). For stayer records where some items were not collected, impute with the stayer group median for that item. Flag employees with >30% missing items and exclude from batch predictions with a warning.
+    </div>
+  </div>
+
+  <!-- C. Model Design -->
+  <div class="card">
+    <div class="card-title" style="font-size:18px"><div class="icon" style="background:#f0fafb">C</div> Model Design &amp; Recommendation</div>
+
+    <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:0 0 10px">Recommended Model: Logistic Regression</h3>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.8;margin-bottom:14px">
+      For HR-facing Likert survey data with n=607, <strong>Logistic Regression is the optimal choice</strong> because: (1) coefficients are directly interpretable as feature weights — HR can understand why a prediction was made; (2) it performs extremely well on linearly-separable survey data; (3) it produces calibrated probabilities; (4) it is fast and deployable without complex infrastructure; (5) SHAP values for LR are simply the feature contribution = coefficient × feature value, giving immediate explainability.
+    </div>
+
+    <div style="overflow-x:auto;margin-bottom:16px">
+      <table class="data-table" style="font-size:12px">
+        <thead><tr><th>Model</th><th>Best For</th><th>HR Explainability</th><th>Recommended?</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Logistic Regression</strong></td><td>Balanced Likert survey data, small-medium n</td><td>⭐⭐⭐⭐⭐ Direct coefficients</td><td>✅ Primary choice</td></tr>
+          <tr><td>Random Forest</td><td>Non-linear patterns, mixed data types</td><td>⭐⭐⭐ Feature importance</td><td>✅ Secondary/ensemble</td></tr>
+          <tr><td>XGBoost</td><td>Large n, complex interactions</td><td>⭐⭐⭐ SHAP values needed</td><td>⚠️ Overkill for n=607</td></tr>
+          <tr><td>SVM</td><td>High-dimensional, text features</td><td>⭐⭐ Hard to explain</td><td>❌ Not recommended</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:0 0 10px">Evaluation Strategy</h3>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.8">
+      Use <strong>stratified 5-fold cross-validation</strong>. Primary metric: <strong>AUC-ROC</strong> (measures discriminative ability across all thresholds). Secondary metrics: Precision/Recall at threshold=0.5, F1-score. Accept model if AUC-ROC ≥ 0.75. For HR use, <strong>Recall is more important than Precision</strong> — missing a high-risk employee (false negative) is more costly than over-flagging (false positive). Set classification threshold at 0.40 instead of 0.50 to increase recall.
+    </div>
+  </div>
+
+  <!-- D. Strategy Knowledge Base -->
+  <div class="card">
+    <div class="card-title" style="font-size:18px"><div class="icon" style="background:#f0faf5">D</div> Strategy Knowledge Base &amp; Recommendation Engine</div>
+
+    <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:0 0 10px">Theme → Strategy Mapping Rules</h3>
+    <div style="overflow-x:auto">
+      <table class="data-table" style="font-size:12px">
+        <thead><tr><th>Risk Theme</th><th>Top Strategies</th><th>Effectiveness Score</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Compensation &amp; Career</strong></td><td>Market competitive salaries; clearer promotion pathways; improved benefits; rural/remote incentives</td><td>3.1–3.6</td></tr>
+          <tr><td><strong>Supervisor / Leadership</strong></td><td>Supervisor/leadership training (top-ranked by DOTs); improved recognition programs; succession planning</td><td>3.1–3.3</td></tr>
+          <tr><td><strong>Training &amp; Development</strong></td><td>Training and professional development programs (most-cited nationally); variety of work assignments; knowledge transfer tools</td><td>3.2–3.6</td></tr>
+          <tr><td><strong>Work Culture &amp; Team</strong></td><td>Recognition and appreciation programs; flexible work arrangements; team building; succession/mentorship</td><td>3.3–3.6</td></tr>
+          <tr><td><strong>Working Conditions</strong></td><td>Resource/equipment upgrades; rural/remote location incentives; flexible arrangements</td><td>3.0–3.6</td></tr>
+          <tr><td><strong>Safety</strong></td><td>Safety culture training; supervisor accountability; employee well-being programs</td><td>—</td></tr>
+          <tr><td><strong>Job Security</strong></td><td>Succession planning; mentorship; knowledge management tools; transparent communication</td><td>3.0–3.3</td></tr>
+          <tr><td><strong>Communication / HR</strong></td><td>Supervisor leadership training; improved HR accessibility; recognition programs</td><td>3.1–3.3</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:12px;color:var(--ink3);margin-top:10px">Effectiveness scores are mean agreement ratings (1–4 scale) from the national DOT HR survey (n=31 DOTs), sourced from the EffectivenessItems sheet.</p>
+  </div>
+
+  <!-- E. Tech Stack -->
+  <div class="card">
+    <div class="card-title" style="font-size:18px"><div class="icon" style="background:#fff8ed">E</div> Recommended Tech Stack</div>
+
+    <div class="grid-2">
+      <div>
+        <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:0 0 12px">🔬 Prototype / Thesis</h3>
+        <div style="font-size:13px;color:var(--ink2);line-height:1.9">
+          <strong>Data:</strong> pandas, numpy, openpyxl<br>
+          <strong>ML:</strong> scikit-learn (LogisticRegression, RandomForest), xgboost<br>
+          <strong>Explainability:</strong> shap<br>
+          <strong>UI:</strong> Streamlit (rapid prototyping, no frontend expertise needed)<br>
+          <strong>File upload:</strong> Built into Streamlit<br>
+          <strong>Chatbot:</strong> Anthropic Claude API<br>
+          <strong>Storage:</strong> SQLite (local) or CSV files<br>
+          <strong>Reports:</strong> openpyxl, reportlab (PDF)<br>
+          <strong>Deployment:</strong> Streamlit Cloud (free) or local
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:0 0 12px">🏗️ Production / Scalable</h3>
+        <div style="font-size:13px;color:var(--ink2);line-height:1.9">
+          <strong>Backend:</strong> FastAPI (Python)<br>
+          <strong>Frontend:</strong> React + TypeScript + Recharts<br>
+          <strong>Database:</strong> PostgreSQL (employee records, predictions, audit log)<br>
+          <strong>ML Service:</strong> mlflow for model versioning + serving<br>
+          <strong>File Processing:</strong> Celery + Redis (async batch jobs)<br>
+          <strong>Chatbot:</strong> Claude API with RAG layer (ChromaDB or pgvector)<br>
+          <strong>Auth:</strong> SAML/SSO integration (for government HR system)<br>
+          <strong>Deployment:</strong> Docker + Kubernetes (or AWS ECS)<br>
+          <strong>Security:</strong> Encrypted PII fields, role-based access control
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- F. Folder Structure -->
+  <div class="card">
+    <div class="card-title" style="font-size:18px"><div class="icon" style="background:#f0faf5">F</div> Recommended Project Folder Structure</div>
+    <pre style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:20px;font-size:12px;color:var(--ink2);overflow-x:auto;line-height:1.7">wydot-turnover-system/
+├── data/
+│   ├── raw/                         # Original uploaded Excel files (DO NOT MODIFY)
+│   │   ├── All_statics_of_exit_survey.xlsx
+│   │   ├── WYDOT_Stayer_Profile_300.xlsx
+│   │   └── DOT_statistical_summary.xlsx
+│   ├── processed/                   # Cleaned, merged, encoded datasets
+│   │   ├── combined_607.csv         # Exit (n=307) + Stayers (n=300) with label column
+│   │   ├── feature_names.json       # 32 feature names in canonical order
+│   │   └── theme_groups.json        # Which features belong to which theme
+│   └── templates/
+│       └── pulse_survey_template.xlsx  # Blank template for HR to distribute
+│
+├── notebooks/
+│   ├── 01_data_exploration.ipynb    # EDA, distributions, missing value analysis
+│   ├── 02_feature_engineering.ipynb # Theme scoring, scaling, correlation analysis
+│   ├── 03_model_training.ipynb      # LR, RF, XGB comparison, CV evaluation
+│   ├── 04_shap_explainability.ipynb # SHAP values, feature importance
+│   └── 05_strategy_mapping.ipynb    # Theme-to-strategy rule validation
+│
+├── src/
+│   ├── data/
+│   │   ├── loader.py                # Load and validate Excel files
+│   │   ├── preprocessor.py          # Clean, impute, scale, encode
+│   │   └── feature_engineer.py     # Compute theme scores
+│   ├── model/
+│   │   ├── trainer.py               # Train and cross-validate models
+│   │   ├── predictor.py             # Load model, predict risk, return explanations
+│   │   └── explainer.py             # SHAP-based or coefficient-based explanations
+│   └── strategy/
+│       ├── knowledge_base.py        # Strategy knowledge base (from DOT survey)
+│       ├── mapper.py                # Map risk themes → recommended strategies
+│       └── ranker.py                # Rank strategies by effectiveness score
+│
+├── models/
+│   ├── logistic_regression_v1.pkl   # Trained model (scikit-learn Pipeline)
+│   ├── scaler_v1.pkl                # StandardScaler fitted on training set
+│   └── model_metadata.json         # Feature list, threshold, AUC-ROC, train date
+│
+├── app/                             # Streamlit app (prototype) OR FastAPI + React (production)
+│   ├── streamlit_app.py             # Main Streamlit entry point (prototype)
+│   ├── pages/
+│   │   ├── single_employee.py
+│   │   ├── batch_upload.py
+│   │   ├── dashboard.py
+│   │   └── chatbot.py
+│   └── api/                        # FastAPI backend (production)
+│       ├── main.py
+│       ├── routes/
+│       │   ├── predict.py
+│       │   ├── batch.py
+│       │   └── strategies.py
+│       └── models/
+│           └── schemas.py
+│
+├── strategy_knowledge/
+│   ├── strategies.json              # Full strategy KB with theme tags, effectiveness scores
+│   ├── leaving_reasons.json         # Top leaving reasons from national DOT survey
+│   └── theme_strategy_map.json      # Mapping: theme → [strategy_ids]
+│
+├── reports/
+│   ├── templates/
+│   │   ├── single_employee_report.html
+│   │   └── batch_summary_report.html
+│   └── generated/                   # Auto-generated PDF/Excel reports
+│
+├── tests/
+│   ├── test_preprocessor.py
+│   ├── test_predictor.py
+│   └── test_strategy_mapper.py
+│
+├── requirements.txt
+├── docker-compose.yml
+└── README.md</pre>
+  </div>
+
+  <!-- G. Implementation Roadmap -->
+  <div class="card">
+    <div class="card-title" style="font-size:18px"><div class="icon" style="background:#fdf0f0">G</div> Phased Implementation Roadmap</div>
+
+    <div style="font-size:13px;color:var(--ink2);line-height:1.9">
+      <div style="margin-bottom:20px;padding:16px;background:var(--surface);border-radius:var(--radius-sm);border-left:4px solid var(--wydot2)">
+        <strong style="color:var(--wydot2)">Phase 1 — Data Preprocessing &amp; Integration</strong> (Week 1–2)<br>
+        Tasks: Load both Excel files, align column names, label exit=1/stayer=0, impute missing values (column median), standardize scale direction (some items may need reversal), export clean CSV.<br>
+        Libraries: pandas, numpy, openpyxl<br>
+        Output: <code>combined_607.csv</code>, <code>feature_names.json</code>
+      </div>
+      <div style="margin-bottom:20px;padding:16px;background:var(--surface);border-radius:var(--radius-sm);border-left:4px solid var(--purple)">
+        <strong style="color:var(--purple)">Phase 2 — Feature Engineering</strong> (Week 2–3)<br>
+        Tasks: Compute 8 theme scores (grouped means), verify internal consistency (Cronbach's α for each theme), create correlation matrix, identify redundant features.<br>
+        Libraries: pandas, scipy, pingouin<br>
+        Output: <code>theme_groups.json</code>, EDA notebook, correlation heatmap
+      </div>
+      <div style="margin-bottom:20px;padding:16px;background:var(--surface);border-radius:var(--radius-sm);border-left:4px solid var(--green)">
+        <strong style="color:var(--green)">Phase 3 — Model Training &amp; Evaluation</strong> (Week 3–4)<br>
+        Tasks: Train LR, RF, XGBoost with stratified 5-fold CV. Compare AUC-ROC, F1, Recall. Select best model. Calibrate threshold. Export trained model and scaler as pickle files.<br>
+        Libraries: scikit-learn, xgboost, shap, mlflow<br>
+        Output: <code>logistic_regression_v1.pkl</code>, model comparison table, ROC curves
+      </div>
+      <div style="margin-bottom:20px;padding:16px;background:var(--surface);border-radius:var(--radius-sm);border-left:4px solid var(--amber)">
+        <strong style="color:var(--amber)">Phase 4 — Explainability &amp; Strategy Mapping</strong> (Week 4–5)<br>
+        Tasks: Implement SHAP value computation for each prediction. Build strategy knowledge base JSON from DOT survey. Implement theme→strategy mapping rules. Validate strategy recommendations against HR expert review.<br>
+        Libraries: shap, json<br>
+        Output: <code>strategies.json</code>, <code>theme_strategy_map.json</code>, explainability module
+      </div>
+      <div style="margin-bottom:20px;padding:16px;background:var(--surface);border-radius:var(--radius-sm);border-left:4px solid var(--teal)">
+        <strong style="color:var(--teal)">Phase 5 — Streamlit Web App (MVP)</strong> (Week 5–7)<br>
+        Tasks: Build single-employee form, file upload + validation, prediction result display with gauge/bars/strategy cards, batch results table, dashboard with aggregated statistics, downloadable reports.<br>
+        Libraries: streamlit, plotly, altair, openpyxl, reportlab<br>
+        Output: Working Streamlit app deployable at streamlit.app
+      </div>
+      <div style="margin-bottom:20px;padding:16px;background:var(--surface);border-radius:var(--radius-sm);border-left:4px solid var(--red)">
+        <strong style="color:var(--red)">Phase 6 — Claude AI Chatbot Integration</strong> (Week 7–9)<br>
+        Tasks: Build system prompt with WYDOT data context. Implement conversation history management. Add context-window-safe data grounding (summarize uploaded batch data into the system prompt). Test with HR user questions. Add quick-action buttons.<br>
+        Libraries: anthropic Python SDK, streamlit-chat<br>
+        Output: Working chatbot page in Streamlit app
+      </div>
+      <div style="padding:16px;background:var(--surface);border-radius:var(--radius-sm);border-left:4px solid var(--ink3)">
+        <strong>Phase 7 — Testing, Validation &amp; Deployment</strong> (Week 9–11)<br>
+        Tasks: HR user testing (3–5 HR staff test sessions), accuracy validation with holdout set, edge case testing (all missing values, extreme scores), security review (no PII in logs), documentation, deploy to Streamlit Cloud or institutional server.<br>
+        Libraries: pytest, locust (load testing)<br>
+        Output: Production-ready application with documentation
+      </div>
+    </div>
+  </div>
+
+  <!-- H. Risks & Limitations -->
+  <div class="card">
+    <div class="card-title" style="font-size:18px"><div class="icon" style="background:#f4f0fd">H</div> Risks, Limitations &amp; Future Improvements</div>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.9">
+      <strong>Current Limitations:</strong><br>
+      • <em>Survey response bias:</em> Exit survey respondents may underreport supervisor issues or overreport pay concerns due to social desirability. Stayer data may also be biased (employees who are very dissatisfied may not complete surveys).<br>
+      • <em>No temporal data:</em> The model treats each employee as a static snapshot; it cannot model how satisfaction changes over time (tenure, seasonal patterns).<br>
+      • <em>No demographic features:</em> Age, tenure, job classification, district are not included — adding them could significantly improve prediction accuracy but requires careful fairness analysis.<br>
+      • <em>n=607 is modest:</em> The model will generalize well for the current data but may need retraining as WYDOT surveys more employees.<br><br>
+      <strong>Future Improvements:</strong><br>
+      • Add employee tenure and job classification as features (with fairness audit)<br>
+      • Implement survival analysis (time-to-turnover prediction)<br>
+      • Build automatic model retraining pipeline (retrain quarterly with new survey data)<br>
+      • Add real-time pulse survey integration (rather than manual file upload)<br>
+      • Implement differential fairness analysis across protected groups<br>
+      • Expand chatbot to retrieve specific employee records from the database<br>
+      • Add peer-comparison benchmarking ("this employee's scores vs district average")
+    </div>
+  </div>
+
+  <!-- Final Recommendation -->
+  <div class="card" style="background:linear-gradient(135deg,var(--wydot) 0%,var(--wydot2) 100%);color:white;border:none">
+    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:14px;color:white">⭐ Final Architecture Recommendation</div>
+    <div style="font-size:13px;line-height:1.9;color:rgba(255,255,255,0.85)">
+      <strong style="color:var(--gold2)">Build First (MVP):</strong> Streamlit + scikit-learn (Logistic Regression) + Claude API chatbot. This can be built in 4–6 weeks, demonstrated to WYDOT HR, and deployed immediately. The MVP is this HTML prototype, which demonstrates the full UX before backend implementation begins.<br><br>
+      <strong style="color:var(--gold2)">Extend To (Production):</strong> FastAPI + React + PostgreSQL + mlflow + ChromaDB (for chatbot RAG). This version adds real authentication, audit logging, model versioning, and scales to handle WYDOT's full workforce. Estimated 3–4 months with a small development team.<br><br>
+      <strong style="color:var(--gold2)">Key Design Principle:</strong> Always prioritize HR explainability over model complexity. A 75% AUC logistic regression that HR staff understand and trust will drive more retention interventions than a 90% AUC black-box model they won't use.
+    </div>
+  </div>
+
+  </div><!-- /max-width -->
+</div>
+
+</div><!-- /main -->
+
+<!-- ══ SCRIPTS ══ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+/* ─── NAVIGATION ─── */
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const tabs = document.querySelectorAll('.nav-tab');
+  const pages = ['home','single','batch','dashboard','chatbot'];
+  const idx = pages.indexOf(id);
+  if (idx >= 0) tabs[idx].classList.add('active');
+  if (id === 'dashboard') initDashboard();
+  window.scrollTo(0, 0);
+}
+
+/* ─── SCALE BUTTONS ─── */
+document.querySelectorAll('.scale-row').forEach(row => {
+  row.querySelectorAll('.scale-btn').forEach(btn => {
+    btn.onclick = function() {
+      row.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
+      this.classList.add('selected');
+    };
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   SCALE CODING — IMPORTANT
+   Exit survey uses TWO scale types:
+   SATISFACTION items (cols: coop_dept, coop_other, job_training,
+     resources, pmi, training_prog, pay, career, phys_conditions,
+     get_resources): 1=Very Poor/Dissatisfied → 4=Excellent/Very Satisfied
+     Risk signal: low score = high risk → contribution = weight*(4−x)
+
+   AGREEMENT items (all remaining cols — positive statements about
+     supervisor, culture, safety, communication):
+     1=Strongly Agree (positive outcome) → 4=Strongly Disagree
+     Risk signal: high score = disagrees with positive = high risk
+     → contribution = weight*(x−1)
+
+   Calibrated from actual WYDOT exit survey means (n=307 leavers):
+   Pay=1.95, Career=2.13, PMI=2.26 (low SAT scores → high risk) ✓
+   Job security=3.47, Safety=3.44 (high AGREE scores → high risk) ✓
+═══════════════════════════════════════════════════════════════ */
+
+const LR_INTERCEPT = -1.5;
+
+/* ═══════════════════════════════════════════════════════════════
+   SCALE: 1=Best/Strongly Agree, 4=Worst/Strongly Disagree (ALL items)
+   HIGHER raw score = MORE dissatisfied = HIGHER turnover risk
+   Confirmed from new Exit Survey + Stayer datasets:
+     - Pay: exit=3.05, stayer=2.86 (gap +0.19) → highest absolute score
+     - PMI: exit=2.74, stayer=2.77 (gap -0.03) → virtually no leaver/stayer difference
+     - Supervisor comfort: exit=1.76, stayer=1.46 (gap +0.30) → strongest predictor
+   Formula: contribution = weight * (val - 1)
+     val=1 (best) → 0 contribution; val=4 (worst) → 3*weight contribution
+═══════════════════════════════════════════════════════════════ */
+
+/* Weights derived from (exit_mean - stayer_mean) gaps.
+   Sorted by gap size: larger gap = stronger differentiator = higher weight */
+const LR_WEIGHTS = {
+  // Gap 0.28–0.30: Supervisor / Communication (strongest predictors)
+  sup_comfort:     0.52,  // gap +0.303 — #1 gap (comfort w/ immediate sup)
+  informed:        0.50,  // gap +0.290 — kept informed about policies
+  valued:          0.48,  // gap +0.288 — treated as valuable member
+  sup_feedback:    0.46,  // gap +0.286 — supervisor gave feedback
+  sup_comm:        0.44,  // gap +0.282 — supervisor receptive to communication
+  clarity:         0.42,  // gap +0.268 — job duties clearly defined
+  fairness:        0.40,  // gap +0.254 — fair/equal treatment
+  sup_teamwork:    0.38,  // gap +0.249 — supervisor developed teamwork
+  upper_mgmt:      0.38,  // gap +0.248 — comfort speaking with upper mgmt
+  proper_training: 0.38,  // gap +0.248 — received proper training
+
+  // Gap 0.20–0.24: Culture, Team, Working Conditions
+  team:            0.36,  // gap +0.236 — team worked well together
+  sup_feedback2:   0.34,  // gap +0.226 — supervisor provided performance feedback
+  equipment:       0.34,  // gap +0.221 — equipment/resources/facilities
+  sup_suggest:     0.32,  // gap +0.218 — free to suggest improvements
+  complaints:      0.32,  // gap +0.217 — complaints resolved promptly
+  sup_sensitive:   0.30,  // gap +0.216 — supervisor sensitive to needs
+  coop_dept:       0.30,  // gap +0.216 — cooperation within dept
+  get_resources:   0.28,  // gap +0.201 — ability to get resources
+  safety_culture:  0.28,  // gap +0.199 — WYDOT safety culture
+  recognition:     0.28,  // gap +0.196 — supervisor provided recognition
+  resolve_problems:0.26,  // gap +0.194 — problems resolved
+
+  // Gap 0.15–0.19: Compensation, Physical, Training
+  pay:             0.26,  // gap +0.192 — pay (highest abs score 3.05 but lower gap)
+  phys_conditions: 0.24,  // gap +0.186 — physical working conditions
+  coop_other:      0.24,  // gap +0.186 — cooperation with other depts
+  job_training:    0.22,  // gap +0.159 — personal job training
+  hr_comfort:      0.22,  // gap +0.159 — comfort speaking with HR
+  job_security:    0.22,  // gap +0.158 — WYDOT provided job security
+  sup_policy:      0.22,  // gap +0.158 — supervisor followed policies
+  safety_sup:      0.20,  // gap +0.156 — supervisor safety environment
+
+  // Gap 0.05–0.13: Weaker predictors
+  career:          0.18,  // gap +0.126 — career development
+  training_prog:   0.14,  // gap +0.056 — training programs
+  pmi:             0.08,  // gap -0.032 — PMI (virtually no leaver/stayer diff)
+};
+
+/* ─── THEME GROUPINGS ─── */
+// ALL items: higher score = worse = more risk (1=best, 4=worst)
+// Theme risk score = average raw score (1–4 scale)
+// Higher average = more dissatisfied theme = more risk
+const THEMES = {
+  'Compensation & Career': {
+    fields: ['pay','career','pmi','recognition'],
+    color: '#d97706', bg: '#fff8ed', icon: '💰'
+  },
+  'Supervisor / Leadership': {
+    fields: ['sup_feedback','sup_suggest','sup_comfort','complaints',
+             'sup_sensitive','sup_comm','sup_feedback2','upper_mgmt'],
+    color: '#7c3aed', bg: '#f4f0fd', icon: '👔'
+  },
+  'Training & Development': {
+    fields: ['job_training','training_prog','proper_training'],
+    color: '#2563eb', bg: '#eff6ff', icon: '📚'
+  },
+  'Work Culture & Team': {
+    fields: ['coop_dept','coop_other','team','valued'],
+    color: '#059669', bg: '#f0faf5', icon: '🏢'
+  },
+  'Working Conditions': {
+    fields: ['equipment','phys_conditions','clarity','get_resources'],
+    color: '#0891b2', bg: '#f0fafb', icon: '🏗️'
+  },
+  'Safety': {
+    fields: ['safety_culture','safety_sup'],
+    color: '#dc2626', bg: '#fef2f2', icon: '🦺'
+  },
+  'Job Security': {
+    fields: ['job_security','informed','sup_policy'],
+    color: '#6b7280', bg: '#f9fafb', icon: '🔒'
+  },
+  'Communication / HR': {
+    fields: ['hr_comfort','fairness','sup_teamwork','resolve_problems'],
+    color: '#db2777', bg: '#fdf4ff', icon: '📢'
+  }
+};
+
+
+/* ═══════════════════════════════════════════════════════════
+   STRATEGY KNOWLEDGE BASE
+   Source: national_dot_survey.xlsx — 31 DOT responses
+   Effectiveness: 0=Not effective, 1=Slightly, 2=Moderately,
+                  3=Very, 4=Extremely (avg across DOTs using it)
+   Adoption: number of DOTs currently using this strategy
+   Theme: which survey theme this strategy addresses
+═══════════════════════════════════════════════════════════ */
+const STRATEGIES = {
+
+  'Compensation & Career': [
+    {
+      title: 'Market-Competitive Salary Review & Targeted Pay Increases',
+      desc: 'Conduct salary benchmarking against private sector and peer DOTs. Implement targeted increases for critical classifications (engineers, maintenance, IT). Pay/salary competitiveness is the #1 leaving reason cited by 19 of 31 national DOTs.',
+      action: 'Commission a compensation study. Present data to legislature for targeted salary adjustments. Prioritize classifications with highest vacancy rates.',
+      dots: ['Michigan DOT','Missouri DOT','Mississippi DOT','Kansas DOT','North Carolina DOT','South Carolina DOT','Pennsylvania DOT','Indiana DOT','Utah DOT'],
+      adoption: 9, effectiveness: 2.11, priority: 1,
+      evidence: 'ArDOT implemented new Engineer, Law Enforcement and IT salary schedules in April 2025. South Carolina increased minimum hiring rate in 2023 — most rates now above state pay grade minimums.'
+    },
+    {
+      title: 'C3PO-Style Internal Non-Advertised Promotion Program',
+      desc: 'Create a Career Path Promotion Program Opportunity — non-advertised internal advancement tied to competency milestones. ArDOT promoted ~1,000 employees since August 2021, directly reducing "no clear path" exits.',
+      action: 'Define competency checkpoints for each job family. Allow managers to nominate employees for advancement without competitive posting. Track retention outcomes quarterly.',
+      dots: ['Arkansas DOT','Kansas DOT','Idaho DOT'],
+      adoption: 3, effectiveness: 3.2, priority: 1,
+      evidence: 'ArDOT: "C3PO has successfully promoted approximately 1,000 employees since August 2021 contributing to lower turnover rates in career paths." Kansas: "We have set up clear Career Pathways with a focus on Career Development."'
+    },
+    {
+      title: 'Clearer & Faster Promotion Opportunities',
+      desc: 'Establish transparent career ladders with defined criteria and timelines. "Lack of advancement or promotion opportunities" is cited by 7 of 31 national DOTs as a top leaving reason.',
+      action: 'Map all WYDOT job families into visible career ladders. Publish advancement criteria. Set SLA for promotion reviews (e.g., 60-day decision guarantee).',
+      dots: ['New Hampshire DOT','New Jersey DOT','Arkansas DOT','Michigan DOT','Ohio DOT','Alabama DOT','Idaho DOT'],
+      adoption: 7, effectiveness: 2.00, priority: 1,
+      evidence: 'Idaho DOT: "Horizontal Career Paths — a way of moving Maintenance and Engineering employees through the pay range based on meeting specific outlined criteria." New York DOT developed traineeships where employees hired at a lower level advance to higher level over 1–2 years with permanent status.'
+    },
+    {
+      title: 'PMI/Performance Review System Reform',
+      desc: 'WYDOT survey data shows PMI scores are the weakest compensation-theme item. Reform to make reviews fair, timely, and directly tied to compensation advancement. Colorado DOT uses competency-based increases for Professional Engineers.',
+      action: 'Audit PMI process for fairness and consistency. Link clear performance metrics to salary step increases. Train supervisors on objective evaluation techniques.',
+      dots: ['Colorado DOT','Oklahoma DOT'],
+      adoption: 2, effectiveness: 2.5, priority: 2,
+      evidence: 'Colorado DOT: "For Professional Engineers: competency based increases." Oklahoma DOT considering "Pay for Performance based on employees\' performance reviews. Initiating pay steps."'
+    }
+  ],
+
+  'Supervisor / Leadership': [
+    {
+      title: 'Supervisor & Leadership Training Programs',
+      desc: 'The most widely adopted retention strategy nationally — 26 of 31 DOTs have it in place. Supervisor relationship is a top leaving reason for 6 DOTs. MassDOT reports it as their single most successful initiative.',
+      action: 'Mandate annual leadership development for all supervisors. Cover: feedback delivery, active listening, conflict resolution, fair treatment, recognition practices. Track employee satisfaction scores per supervisor.',
+      dots: ['New Hampshire DOT','Massachusetts DOT','Montana DOT','Hawaii DOT','Alaska DOT','New Jersey DOT','Mississippi DOT','Oklahoma DOT','Michigan DOT','Caltrans','Minnesota','Missouri DOT','Colorado DOT','Kansas DOT','Ohio DOT','Texas DOT','North Carolina DOT','South Carolina DOT','New Mexico DOT','Louisiana DOT','Indiana DOT','Utah DOT','Kentucky DOT','Alabama DOT','Idaho DOT','New York DOT'],
+      adoption: 26, effectiveness: 2.08, priority: 1,
+      evidence: 'Massachusetts DOT: "Mentorship program and Supervisor training" — rated Very and Extremely effective. Caltrans supervisor training rated Extremely effective. Michigan DOT: "investing heavily in supervisor and leadership development."'
+    },
+    {
+      title: 'Structured 1-on-1s & Stay Interviews',
+      desc: 'Regular career conversations between supervisors and direct reports surface dissatisfaction before it becomes resignation. WYDOT exit data shows supervisor communication has the largest leaver/stayer gap (+0.30) — strongest predictor of leaving.',
+      action: 'Require monthly 1-on-1s for all direct reports. Provide supervisors with structured conversation guides. Conduct semi-annual stay interviews for all employees.',
+      dots: ['Ohio DOT','Texas DOT'],
+      adoption: 2, effectiveness: 3.0, priority: 1,
+      evidence: 'Ohio DOT implementing "30/60/90 day check ins after hire to assess what\'s going well and what could be better." Texas DOT: "Survey of Employee Engagement initiatives and follow-ups."'
+    },
+    {
+      title: 'Recognition & Appreciation Programs',
+      desc: 'Formal and informal recognition for supervisor-level acknowledgment. Adopted by 13 DOTs, avg effectiveness 2.23. "Lack of recognition and not feeling valued" cited by 2 DOTs as a leaving reason.',
+      action: 'Launch peer-to-peer recognition platform. Require supervisors to acknowledge employee contributions at monthly team meetings. Tie recognition to PMI process.',
+      dots: ['New Hampshire DOT','Massachusetts DOT','Montana DOT','New Jersey DOT','Mississippi DOT','Michigan DOT','Caltrans','Missouri DOT','Kansas DOT','Indiana DOT','Alabama DOT','Idaho DOT','New York DOT'],
+      adoption: 13, effectiveness: 2.23, priority: 2,
+      evidence: 'New Jersey DOT: recognition rated Extremely effective. MassDOT: recognition rated Very effective. Louisiana DOT: "Targeted Compensation Tools and Employee Recognition" as key initiative. New York DOT: "employee recognition programs have contributed in part to improved retention."'
+    },
+    {
+      title: 'Mentorship Programs',
+      desc: 'Connects experienced employees with newer staff. Caltrans Mentorship Program completed 10th season with 530+ participants. MassDOT identifies mentorship as most successful initiative.',
+      action: 'Launch a formal WYDOT mentorship program. Match mentees with mentors based on career goals. Run two cohorts per year with structured monthly themes.',
+      dots: ['Massachusetts DOT','Michigan DOT','Caltrans','New York DOT'],
+      adoption: 4, effectiveness: 3.2, priority: 2,
+      evidence: 'Caltrans: "Mentorship Program has completed its 10th season with over 530 participants, offering monthly themes from organizational awareness, work life balance and emotional intelligence." New Jersey DOT: reclassifying employees performing at higher level after 2 years — retention mechanism tied to mentored performance.'
+    }
+  ],
+
+  'Training & Development': [
+    {
+      title: 'Training & Professional Development Programs',
+      desc: 'The most widely adopted strategy nationally — 28 of 31 DOTs. Average effectiveness 2.19. Directly addresses "lack of advancement" and "better opportunities elsewhere" as leaving reasons.',
+      action: 'Create Individual Development Plans (IDPs) for every employee. Fund external certifications. Build MoDOT-style competency curriculum tied to automatic salary step increases.',
+      dots: ['Washington DOT','North Dakota DOT','Arkansas DOT','New Hampshire DOT','Massachusetts DOT','Montana DOT','Hawaii DOT','Alaska DOT','New Jersey DOT','Mississippi DOT','Oklahoma DOT','Michigan DOT','Caltrans','Minnesota','Missouri DOT','Colorado DOT','Kansas DOT','Ohio DOT','Texas DOT','North Carolina DOT','South Carolina DOT','New Mexico DOT','Louisiana DOT','Indiana DOT','Utah DOT','Kentucky DOT','Alabama DOT','Idaho DOT'],
+      adoption: 28, effectiveness: 2.19, priority: 1,
+      evidence: 'New Jersey DOT rates training Extremely effective. Caltrans: training Extremely effective. North Carolina: "Salary competitiveness has helped as well as training and development opportunities." Montana DOT: "knowledge share, career ladders" as successful initiatives.'
+    },
+    {
+      title: 'Variety of Work Assignments & Cross-Training',
+      desc: 'Job rotation and cross-functional projects reduce monotony and build transferable skills. Adopted by 13 DOTs, avg effectiveness 2.31 — one of the higher-rated strategies.',
+      action: 'Implement 6-month rotation assignments for willing employees. Allow temporary transfers between districts. Create cross-functional project teams for capital programs.',
+      dots: ['New Hampshire DOT','Massachusetts DOT','Hawaii DOT','New Jersey DOT','Michigan DOT','Minnesota','Missouri DOT','Colorado DOT','Ohio DOT','Texas DOT','South Carolina DOT','Louisiana DOT','Indiana DOT'],
+      adoption: 13, effectiveness: 2.31, priority: 2,
+      evidence: 'Hawaii DOT rates variety of work assignments as Very effective. Michigan DOT: "increasing opportunities for entry-level pathway through programs like the Engineering Assistant Program." Minnesota: variety rated Very effective.'
+    },
+    {
+      title: 'Knowledge Management & Transfer Tools',
+      desc: 'Capture institutional knowledge from retiring/departing employees before it is lost. Adopted by 5 DOTs with moderate effectiveness. Critical for WYDOT with retirement-eligible workforce.',
+      action: 'Build a wiki-based procedure library (MoDOT Engineering Policy Guide model). Require knowledge transfer documentation 6 months before retirement. Implement Communities of Practice for key technical roles.',
+      dots: ['Montana DOT','New Jersey DOT','Michigan DOT','Caltrans','North Carolina DOT'],
+      adoption: 5, effectiveness: 2.00, priority: 3,
+      evidence: 'Michigan DOT: "investing heavily in knowledge-transfer practices." Montana DOT: "knowledge share" as a key successful initiative. Caltrans: knowledge management rated Moderately effective.'
+    }
+  ],
+
+  'Work Culture & Team': [
+    {
+      title: 'Flexible Work Arrangements (Remote, Flextime, Compressed Weeks)',
+      desc: 'The highest effectiveness-rated strategy nationally — avg 2.68 out of 4.0. Adopted by 21+ DOTs. Hawaii DOT rates it Extremely effective. Directly addresses work-life balance and burnout.',
+      action: 'Pilot 4x10 compressed weeks for eligible non-field positions. Expand telework policy to all office-based roles. Allow flex start/end times (e.g., 7–9am start window).',
+      dots: ['Arkansas DOT','New Hampshire DOT','Massachusetts DOT','Montana DOT','Hawaii DOT','Alaska DOT','New Jersey DOT','Mississippi DOT','Michigan DOT','Caltrans','Minnesota','Missouri DOT','Colorado DOT','Kansas DOT','Texas DOT','North Carolina DOT','New Mexico DOT','Louisiana DOT','Indiana DOT','Utah DOT','Kentucky DOT','Idaho DOT'],
+      adoption: 22, effectiveness: 2.68, priority: 1,
+      evidence: 'Hawaii DOT: "Flexible/Hybrid Remote work for eligible employees" — rated Extremely effective. New Jersey DOT rated flexible work Very effective and is considering Alternate Work Week Program. New Mexico DOT: "Alternative Worksite Locations in certain areas have helped retain employees who drive 45+ miles to work each day."'
+    },
+    {
+      title: 'Employee Engagement Surveys & Follow-Up',
+      desc: 'Systematic pulse surveys with demonstrated follow-through signal to employees that their voice matters. Texas DOT and Kansas DOT both actively investing here.',
+      action: 'Administer biannual pulse surveys aligned to the 32 WYDOT survey items. Publish results and action plans within 30 days. Hold district-level debrief sessions.',
+      dots: ['Texas DOT','Kansas DOT'],
+      adoption: 2, effectiveness: 2.5, priority: 2,
+      evidence: 'Texas DOT: "Survey of Employee Engagement initiatives and follow-ups." Kansas DOT considering "Employee engagement surveys" and "Improving communication strategies."'
+    },
+    {
+      title: 'Revamped Onboarding & 30/60/90-Day Check-Ins',
+      desc: 'Ohio DOT redesigned orientation to focus on employee experience rather than paperwork. "First impressions are a really big deal." Structured early check-ins catch problems before they become resignations.',
+      action: 'Redesign WYDOT new hire orientation as a 3-day experience program. Assign a peer buddy for first 90 days. Implement structured 30/60/90-day manager check-ins with documented action items.',
+      dots: ['Ohio DOT','Louisiana DOT'],
+      adoption: 2, effectiveness: 3.0, priority: 2,
+      evidence: 'Ohio DOT: "Revamped orientation program to focus more on the employees\' experience. 1st impressions are a really big deal." Louisiana DOT: "Enhanced New Hire Onboarding and Exit Interview Process" as a key successful initiative.'
+    }
+  ],
+
+  'Working Conditions': [
+    {
+      title: 'Rural & Remote Location Incentives',
+      desc: 'Housing stipends, commute assistance, relocation bonuses for rural district assignments. Directly relevant for Wyoming\'s geographic footprint. Adopted by 7+ DOTs.',
+      action: 'Establish a Wyoming rural assignment stipend for positions >60 miles from Cheyenne/Casper. Offer housing assistance for Maintenance positions in remote districts. Consider compressed work week to reduce commute days.',
+      dots: ['Delaware DOT','Montana DOT','Alaska DOT','Michigan DOT','Missouri DOT','Colorado DOT','New Mexico DOT','Idaho DOT'],
+      adoption: 8, effectiveness: 1.88, priority: 2,
+      evidence: 'New Mexico DOT: "Alternative Worksite Locations have helped retain employees who drive 45+ miles to work each day." Colorado DOT: "Mtc housing incentives." Montana DOT: rural/remote incentives rated Moderately effective.'
+    },
+    {
+      title: 'Equipment, Resources & Facilities Upgrade',
+      desc: 'WYDOT exit survey shows equipment/resources is a consistent dissatisfaction area. Ensuring field crews have adequate, modern tools is a baseline retention requirement.',
+      action: 'Survey all districts for equipment and resource adequacy gaps. Establish a 3-year equipment refresh cycle. Prioritize upgrade budget toward highest-turnover districts.',
+      dots: ['Michigan DOT'],
+      adoption: 1, effectiveness: 2.5, priority: 2,
+      evidence: 'WYDOT exit survey: equipment/resources rated 2.85/4 by leavers (translated: 2.15/4 on 1=Poor scale) — below acceptable threshold. Field-level resource adequacy is foundational to worker safety and satisfaction.'
+    }
+  ],
+
+  'Safety': [
+    {
+      title: 'Safety Culture & Supervisor Accountability Training',
+      desc: 'WYDOT stayers score safety highly (3.51/4) — a relative strength. Maintaining it requires active investment. Integrate safety leadership into all supervisor development programs.',
+      action: 'Add safety climate module to supervisor training. Conduct semi-annual safety culture surveys by district. Create a "speak-up on safety" anonymous reporting channel with guaranteed response SLA.',
+      dots: ['Alaska DOT','Michigan DOT'],
+      adoption: 2, effectiveness: 2.8, priority: 2,
+      evidence: 'WYDOT stayer data: safety_culture=3.42, safety_sup=3.59 — among highest satisfaction scores. Leavers score safety 3.33 vs stayers 3.51. Protecting this relative WYDOT strength is key to retaining the majority who stay.'
+    },
+    {
+      title: 'Employee Well-Being & EAP Programs',
+      desc: 'Workload and stress is cited as a leaving reason by 2 national DOTs. Mental health support reduces burnout-driven attrition.',
+      action: 'Promote EAP (Employee Assistance Program) actively at all-hands meetings. Allow wellness time during work hours. Provide manager training on recognizing and responding to employee stress.',
+      dots: ['Texas DOT','Michigan DOT'],
+      adoption: 2, effectiveness: 2.5, priority: 3,
+      evidence: 'Texas DOT allows 30-minute wellness breaks 3x/week plus wellness leave. Michigan DOT\'s integrated approach includes "employee support" as a core retention pillar alongside development.'
+    }
+  ],
+
+  'Job Security': [
+    {
+      title: 'Succession Planning & Mentorship Programs',
+      desc: 'Adopted by 11 DOTs, avg effectiveness 2.18. Visible succession pathways signal that WYDOT invests in employee futures. WYDOT stayer data shows job security is a relative strength (3.60/4) — must be maintained.',
+      action: 'Identify succession candidates for all Director/Manager roles. Create development plans for high-potential employees. Communicate workforce planning strategy to all staff annually.',
+      dots: ['North Dakota DOT','Massachusetts DOT','New Jersey DOT','Mississippi DOT','Michigan DOT','Caltrans','Missouri DOT','Colorado DOT','Kansas DOT','Ohio DOT','Alabama DOT'],
+      adoption: 11, effectiveness: 2.18, priority: 2,
+      evidence: 'Caltrans: succession planning rated Extremely effective. Michigan DOT: succession planning rated Very effective. Pennsylvania DOT considering "better tools for succession planning, career development paths/plans, and forecasting vacancies due to retirement."'
+    },
+    {
+      title: 'Transparent Workforce Communication',
+      desc: 'WYDOT exit data: "kept well informed" is consistently low for leavers. Regular, honest communication about organizational direction reduces uncertainty-driven exits.',
+      action: 'Establish quarterly all-hands communication from WYDOT Director. Publish workforce planning data (retirement projections, hiring pipeline) annually. Give district managers talking points on organizational stability.',
+      dots: ['Michigan DOT','Kansas DOT'],
+      adoption: 2, effectiveness: 2.8, priority: 2,
+      evidence: 'Michigan DOT invested in "dedicated measurement and benchmarking specialist" to strengthen workforce intelligence and "equip department leaders with timely, actionable insights." Kansas DOT: "Improving communication strategies" as near-term goal.'
+    }
+  ],
+
+  'Communication / HR': [
+    {
+      title: 'Improved HR Accessibility & Exit Interview Reform',
+      desc: 'Formalize exit interviews, new-hire surveys, and stay interviews to systematically capture and act on turnover drivers. Louisiana DOT identifies this as a key successful initiative.',
+      action: 'Standardize exit interview format aligned to the 32 WYDOT survey items. Publish aggregated exit data to leadership quarterly. Create anonymous HR feedback channel accessible to all employees.',
+      dots: ['Louisiana DOT','New Jersey DOT','Michigan DOT'],
+      adoption: 3, effectiveness: 2.5, priority: 2,
+      evidence: 'Louisiana DOT: "Enhanced New Hire Onboarding and Exit Interview Process" identified as key successful retention initiative. Michigan DOT: workforce analytics system captures "employee exit survey results and other critical data points related to engagement."'
+    },
+    {
+      title: 'Benefits Communication & Total Compensation Visibility',
+      desc: 'Pennsylvania DOT found that employees undervalue their benefits because they are not obvious. Total compensation (salary + retirement + healthcare) for public-sector jobs is often significantly higher than base salary suggests.',
+      action: 'Build a Total Compensation Calculator showing salary + pension + health + leave value. Deliver benefits awareness sessions at onboarding and annually. Use during recruitment to compete with private sector.',
+      dots: ['Pennsylvania DOT','Missouri DOT'],
+      adoption: 2, effectiveness: 2.5, priority: 3,
+      evidence: 'Pennsylvania DOT: "Benefit presentations to better understand all the benefits that are available to employees that are not obvious." Missouri DOT uses an interactive tool during recruiting that highlights total compensation including retirement and medical benefits.'
+    }
+  ]
+};
+
+
+/* ─── SIGMOID FUNCTION ─── */
+function sigmoid(x) { return 1 / (1 + Math.exp(-x)); }
+
+/* ─── GET SURVEY RESPONSES ─── */
+function getSurveyData() {
+  const data = {};
+  document.querySelectorAll('.scale-row').forEach(row => {
+    const field = row.getAttribute('data-field');
+    const selected = row.querySelector('.scale-btn.selected');
+    data[field] = selected ? parseInt(selected.getAttribute('data-val')) : null;
+  });
+  return data;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCALE: 1=Best, 4=Worst (ALL items, unified)
+   contribution = weight * (val - 1)
+   val=1 → 0 risk; val=4 → 3*weight (max risk)
+═══════════════════════════════════════════════════════ */
+
+/* ─── COMPUTE RISK ─── */
+function computeRisk(data) {
+  const contributions = [];
+  // TRANSLATION LAYER: UI presents 1=Poor/Strongly Disagree → 4=Excellent/Strongly Agree
+  // Risk formula: val=1 (Poor) → contribution=3*weight (max risk)
+  //               val=4 (Excellent) → contribution=0 (no risk)
+  Object.entries(LR_WEIGHTS).forEach(([field, weight]) => {
+    const val = data[field];
+    if (val !== null && val !== undefined) {
+      const contribution = weight * (4 - val);
+      const riskLabel = val === 1 ? 'Strongly Disagree / Poor'
+                      : val === 2 ? 'Disagree / Fair'
+                      : val === 3 ? 'Agree / Good'
+                      : 'Strongly Agree / Excellent';
+      contributions.push({ field, val, weight, contribution, riskLabel });
+    }
+  });
+
+  const n = contributions.length;
+  if (n === 0) return { risk: 0.5, contributions };
+
+  const totalContrib = contributions.reduce((s, c) => s + c.contribution, 0);
+  const maxPossible = Object.values(LR_WEIGHTS).reduce((s,w) => s + w * 3, 0);
+  const maxItems = Object.keys(LR_WEIGHTS).length;
+  // Scale up for partial responses
+  const scaledTotal = totalContrib * (maxItems / n);
+  const logit = LR_INTERCEPT + (scaledTotal / maxPossible) * 8.0;
+  const risk = Math.max(0.04, Math.min(0.97, sigmoid(logit)));
+  return { risk, contributions };
+}
+
+/* ─── COMPUTE THEME SCORES (1–4 scale, higher = more risk) ─── */
+function computeThemeScores(data) {
+  // Returns avg score per theme on 1=Poor,4=Excellent UI scale
+  // Lower avg = more problems = higher risk (highlighted red/amber)
+  var scores = {};
+  Object.keys(THEMES).forEach(function(theme) {
+    var fields = THEMES[theme].fields;
+    var vals = fields.map(function(f){ return data[f]; })
+                     .filter(function(v){ return v !== null && v !== undefined && !isNaN(v); });
+    scores[theme] = vals.length > 0 ? vals.reduce(function(a,b){ return a+b; }, 0) / vals.length : 2.5;
+  });
+  return scores;
+}
+
+/* ─── RISK CATEGORY ─── */
+function getRiskCat(risk) {
+  if (risk >= 0.65) return { cat: 'HIGH',   cls: 'high',   color: '#d63030' };
+  if (risk >= 0.35) return { cat: 'MEDIUM', cls: 'medium', color: '#c97b00' };
+  return                   { cat: 'LOW',    cls: 'low',    color: '#1a7a4a' };
+}
+
+/* ─── RENDER THEME BARS (1=best, 4=worst — sort descending = worst first) ─── */
+function renderThemeBars(containerId, themeScores) {
+  // Score 1=Poor(red/risk) → 4=Excellent(green/strength)
+  // Sort: worst (lowest score) first so HR sees problems at top
+  var container = document.getElementById(containerId);
+  if (!container) return;
+  var sorted = Object.entries(themeScores).sort(function(a,b){ return a[1]-b[1]; });
+  container.innerHTML = sorted.map(function(entry) {
+    var theme = entry[0], score = entry[1];
+    var cfg = THEMES[theme] || {icon:'', color:'#888'};
+    var pct = ((score - 1) / 3 * 100).toFixed(1);
+    // Color based on score: 1-2=red, 2-2.5=amber, 2.5-3=teal, 3-4=green
+    var barColor, badge, badgeStyle;
+    if (score < 2.0) {
+      barColor = '#d63030';
+      badge = 'RISK AREA';
+      badgeStyle = 'background:#fdf0f0;color:#d63030;border:1px solid #f8c8c8;';
+    } else if (score < 2.5) {
+      barColor = '#c97b00';
+      badge = 'CONCERN';
+      badgeStyle = 'background:#fff8ed;color:#c97b00;border:1px solid #fde5b0;';
+    } else if (score < 3.0) {
+      barColor = '#0891b2';
+      badge = 'MODERATE';
+      badgeStyle = 'background:#f0fafb;color:#0891b2;border:1px solid #b8e8f4;';
+    } else {
+      barColor = '#1a7a4a';
+      badge = 'STRENGTH';
+      badgeStyle = 'background:#f0faf5;color:#1a7a4a;border:1px solid #b8e8d4;';
+    }
+    return '<div class="theme-bar-row" style="margin-bottom:14px;">' +
+      '<div class="theme-bar-label" style="width:180px;">' + cfg.icon + ' ' + theme + '</div>' +
+      '<div class="theme-bar-track" style="flex:1;">' +
+        '<div class="theme-bar-fill" style="width:' + pct + '%;background:' + barColor + ';transition:width 0.8s ease;"></div>' +
+      '</div>' +
+      '<div style="width:52px;text-align:right;font-weight:700;font-size:12px;color:' + barColor + ';">' + score.toFixed(2) + '</div>' +
+      '<div style="margin-left:8px;"><span style="' + badgeStyle + 'font-size:9px;font-weight:700;padding:2px 7px;border-radius:100px;letter-spacing:0.5px;">' + badge + '</span></div>' +
+      '</div>';
+  }).join('');
+}
+
+/* ─── SINGLE PREDICTION ─── */
+function runSinglePrediction() {
+  const data = getSurveyData();
+  const answered = Object.values(data).filter(v => v !== null).length;
+  if (answered < 16) {
+    alert('Please rate at least 16 survey items before predicting. Currently answered: ' + answered + '/32');
+    return;
+  }
+
+  const { risk, contributions } = computeRisk(data);
+  const themeScores = computeThemeScores(data);
+  const { cat, cls, color } = getRiskCat(risk);
+
+  // Show results
+  document.getElementById('single-placeholder').style.display = 'none';
+  document.getElementById('single-results').classList.add('show');
+
+  // Gauge
+  const pct = Math.round(risk * 100);
+  const circumference = 2 * Math.PI * 62;
+  const offset = circumference * (1 - risk);
+  document.getElementById('gauge-arc').style.strokeDashoffset = offset;
+  document.getElementById('gauge-arc').style.stroke = color;
+  document.getElementById('gauge-pct').textContent = pct + '%';
+  document.getElementById('gauge-cat').textContent = cat + ' RISK';
+
+  // Risk pill
+  document.getElementById('risk-pill-wrap').innerHTML = `<span class="risk-pill ${cls}"><span class="dot"></span> ${cat} RISK — ${pct}% probability of leaving</span>`;
+
+  // Worst theme (highest risk signal)
+  const worstTheme = Object.entries(themeScores).sort((a,b) => a[1]-b[1])[0]; // lowest score = worst theme (1=Poor)
+  document.getElementById('risk-explanation').innerHTML = `
+    Based on ${answered} survey responses, this employee has a <strong>${pct}% estimated probability</strong> of leaving WYDOT. The primary concern area is <strong>${worstTheme[0]}</strong> — average score <strong>${worstTheme[1].toFixed(2)}/4.0</strong> (scores below 2.5 indicate risk; above 3.0 indicate strength).
+    ${cat === 'HIGH' ? '<br><br><span class="text-danger">Immediate HR intervention recommended — schedule 1-on-1 within 1 week.</span>' : ''}
+    ${cat === 'MEDIUM' ? '<br><br><span class="text-warn">Proactive outreach recommended within 30 days.</span>' : ''}
+    ${cat === 'LOW' ? '<br><br><span class="text-success">Continue current engagement. Routine check-in within 60 days.</span>' : ''}`;
+
+  // Theme bars (highest risk first)
+  renderThemeBars('theme-bars', themeScores);
+
+  // Risk factors — sort contributions desc; show label + what value means
+  const sortedContribs = [...contributions].sort((a,b) => b.contribution - a.contribution).slice(0, 6);
+  const fieldLabels = {
+    pay:'Rate of pay', career:'Career development', pmi:'PMI review system',
+    training_prog:'Training programs', job_training:'Personal job training',
+    phys_conditions:'Physical conditions', resources:'Equipment/resources',
+    coop_other:'Cross-dept cooperation', coop_dept:'Dept cooperation',
+    get_resources:'Ability to get resources',
+    job_security:'Job security feeling', safety_sup:'Supervisor safety env.',
+    sup_policy:'Supervisor follows policy', safety_culture:'Safety culture',
+    sup_comm:'Supervisor communication', hr_comfort:'HR comfort',
+    informed:'Kept well informed', sup_comfort:'Comfort w/ supervisor',
+    clarity:'Job duties clarity', team:'Team cooperation',
+    fairness:'Fair/equal treatment', sup_feedback:'Supervisor feedback',
+    sup_suggest:'Free to suggest', resolve_problems:'Problem resolution',
+    recognition:'Recognition provided', sup_teamwork:'Supervisor teamwork',
+    sup_sensitive:'Supervisor sensitivity', upper_mgmt:'Upper mgmt access',
+    valued:'Treated as valuable', proper_training:'Proper training received',
+    complaints:'Complaint resolution'
+  };
+
+  document.getElementById('risk-factors').innerHTML = sortedContribs.map(function(c) {
+    var riskLevel = c.contribution >= 1.5 ? '' : c.contribution >= 0.8 ? 'medium' : 'low';
+    var scaleNote = 'rated ' + c.val + '/4 — ' + c.riskLabel;
+    return '<div class="factor-chip ' + riskLevel + '">' + (fieldLabels[c.field] || c.field) + ': ' + scaleNote + '</div>';
+  }).join('');
+
+  // Strategies from top 3 risk themes (lowest scores)
+  const worstThemes = Object.entries(themeScores).sort((a,b)=>a[1]-b[1]).slice(0,3).map(function(e){ return e[0]; });
+  var strategiesHtml = '';
+  worstThemes.forEach(function(theme) {
+    var strats = STRATEGIES[theme] || [];
+    strats.slice(0,2).forEach(function(s) {
+      var effStars = s.effectiveness >= 2.5 ? '★★★' : s.effectiveness >= 2.0 ? '★★' : '★';
+      var effColor = s.effectiveness >= 2.5 ? '#1a7a4a' : s.effectiveness >= 2.0 ? '#c97b00' : '#6b7280';
+      var dotList = s.dots ? s.dots.slice(0,4).join(', ') + (s.dots.length > 4 ? ' +' + (s.dots.length-4) + ' more' : '') : '';
+      var borderColor = s.priority === 1 ? '#d63030' : s.priority === 2 ? '#c97b00' : '#1a7a4a';
+      strategiesHtml += '<div class="strategy-card" style="border-left:4px solid ' + borderColor + ';margin-bottom:14px;padding:18px 20px;background:var(--white);border-radius:var(--radius-sm);border:1px solid var(--border);border-left:4px solid ' + borderColor + ';">' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
+          '<span style="background:var(--surface);border:1px solid var(--border);border-radius:100px;font-size:10px;font-weight:700;padding:3px 10px;color:var(--wydot2);">' + (THEMES[theme] ? THEMES[theme].icon : '') + ' ' + theme + '</span>' +
+          '<span style="font-size:10px;font-weight:700;color:' + effColor + ';">' + effStars + ' Effectiveness: ' + s.effectiveness.toFixed(2) + '/4.0</span>' +
+          '<span style="font-size:10px;color:var(--ink3);border:1px solid var(--border);border-radius:100px;padding:2px 8px;">' + s.adoption + ' DOTs use this</span>' +
+        '</div>' +
+        '<div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;">' + s.title + '</div>' +
+        '<div style="font-size:12px;color:var(--ink2);line-height:1.7;margin-bottom:8px;">' + s.desc + '</div>' +
+        '<div style="background:var(--surface);border-radius:6px;padding:10px 12px;border-left:3px solid ' + effColor + ';margin-bottom:8px;">' +
+          '<div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Recommended Action</div>' +
+          '<div style="font-size:12px;color:var(--ink2);line-height:1.6;">' + s.action + '</div>' +
+        '</div>' +
+        (s.evidence ? '<div style="font-size:11px;color:var(--ink3);font-style:italic;line-height:1.5;margin-bottom:6px;">' + s.evidence + '</div>' : '') +
+        '<div style="font-size:10px;color:var(--ink3);">Peer DOTs: ' + dotList + '</div>' +
+        '</div>';
+    });
+  });
+  document.getElementById('strategies-list').innerHTML = strategiesHtml || '<p style="color:var(--ink3);font-size:13px;">Rate more survey items to generate targeted strategies.</p>';
+
+  // Action plan
+  const urgency = cat==='HIGH' ? 'Immediate (within 1 week)' : cat==='MEDIUM' ? 'Near-term (within 30 days)' : 'Routine (within 60 days)';
+  document.getElementById('action-plan').innerHTML = `
+    <strong>Urgency:</strong> ${urgency}<br>
+    <strong>Primary action:</strong> Schedule retention conversation with employee focusing on <em>${worstTheme[0]}</em> concerns.<br>
+    <strong>Secondary action:</strong> Brief immediate supervisor on risk level and applicable leadership strategies.<br>
+    <strong>Recommended strategy:</strong> ${(STRATEGIES[worstTheme[0]]||[]).slice(0,2).map(s=>s.title).join('; ')}.<br>
+    <strong>Follow-up:</strong> Re-survey in 30 days to track change in risk score.`;
+
+  document.getElementById('single-results').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+/* ─── BATCH FILE UPLOAD ─── */
+function handleFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  showOverlay('Reading and validating file...');
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(ws, { defval: null });
+      processBatchData(raw);
+    } catch(err) {
+      hideOverlay();
+      alert('Error reading file: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function processBatchData(rows) {
+  showOverlay('Running turnover risk predictions...');
+  setTimeout(() => {
+    const results = rows.map((row, idx) => {
+      // Try to map columns to our field names (fuzzy matching)
+      const data = mapRowToFields(row);
+      const { risk } = computeRisk(data);
+      const themeScores = computeThemeScores(data);
+      const { cat, cls } = getRiskCat(risk);
+      const worstTheme = Object.entries(themeScores).sort((a,b) => a[1]-b[1])[0]; // lowest score = worst theme (1=Poor)
+      return {
+        idx: idx + 1,
+        id: row['EmployeeID'] || row['Employee_ID'] || row['Name'] || ('EMP-' + String(idx+1).padStart(3,'0')),
+        risk: Math.round(risk * 100),
+        cat, cls,
+        worstTheme: worstTheme[0],
+        themeScores,
+        data
+      };
+    });
+
+    renderBatchResults(results);
+    hideOverlay();
+  }, 800);
+}
+
+function mapRowToFields(row) {
+  // Column name mapping (common survey column names → our field names)
+  const colMap = {
+    'Cooperationwithinyourdepartmentprogram': 'coop_dept',
+    'Cooperationwithotherdepartmentsprograms': 'coop_other',
+    'Personaljobtraining': 'job_training',
+    'Equipmentprovidedmaterialsresourcesfacilities': 'resources',
+    'WYDOTsperformancereviewsystemPMI': 'pmi',
+    'Trainingprograms': 'training_prog',
+    'Rateofpayforyourjob': 'pay',
+    'Careerdevelopmentadvancementopportunities': 'career',
+    'Physicalworkingconditions': 'phys_conditions',
+    'getresources': 'get_resources',
+    'IbelievethatIwastreatedasavaluablememberofWYDOT': 'valued',
+    'MyimmediatesupervisorletmeknowwhenIwasdoinga3job': 'sup_feedback',
+    'Ifeltfreetosuggesttomysupervisorchangesthatwouldimprovemydepartm': 'sup_suggest',
+    'Ireceivedthepropertraininginordertoperformmyjobeffectively': 'proper_training',
+    'Employeeproblemsandcomplaintswereresolved2lyandpromptlyinmydepar': 'complaints',
+    'IfIhadquestionsorconcernsIfeltcomfortablespeakingwithmyimmediate': 'sup_comfort',
+    'IfIhadquestionsorconcernsIfeltcomfortablespeakingwithuppermanage': 'upper_mgmt',
+    'IfIhadquestionsorconcernsIfeltcomfortablespeakingwithHumanResour': 'hr_comfort',
+    'Iwaskeptwellinformedaboutmydepartmentspoliciesandproceduresandot': 'informed',
+    'IfeltthatWYDOTprovidedmewithjobsecurity': 'job_security',
+    'Membersofmyteamworkedwelltogether': 'team',
+    'IfeltWYDOTsupportedacultureofsafety': 'safety_culture',
+    'Myjobdutiesandresponsibilitieswereclearlydefined': 'clarity',
+    'Providedrecognition': 'recognition',
+    'Resolvedcomplaintsampproblems': 'resolve_problems',
+    'Wassensitivetoemployeesneeds': 'sup_sensitive',
+    'Providedfeedbackonperformance': 'sup_feedback',
+    'Wasreceptivetoopencommunication': 'sup_comm',
+    'FollowedWYDOTpolicies': 'sup_policy',
+    'Demonstrated2ampequaltreatment': 'fairness',
+    'Developedcooperationampteamwork': 'sup_teamwork',
+    'Providedanenvironmentofsafety': 'safety_sup'
+  };
+
+  const data = {};
+  // Initialize with nulls
+  Object.keys(LR_WEIGHTS).forEach(f => data[f] = null);
+
+  // Map from row
+  Object.entries(row).forEach(([col, val]) => {
+    const field = colMap[col];
+    if (field && val !== null && !isNaN(val)) {
+      data[field] = Math.min(4, Math.max(1, parseInt(val)));
+    }
+  });
+
+  return data;
+}
+
+function renderBatchResults(results) {
+  document.getElementById('batch-results').classList.add('show');
+
+  const high = results.filter(r => r.cat === 'HIGH').length;
+  const med = results.filter(r => r.cat === 'MEDIUM').length;
+  const low = results.filter(r => r.cat === 'LOW').length;
+  const avgRisk = Math.round(results.reduce((a,b)=>a+b.risk,0)/results.length);
+
+  document.getElementById('batch-stat-cards').innerHTML = `
+    <div class="stat"><div class="stat-label">Total Employees</div><div class="stat-value">${results.length}</div></div>
+    <div class="stat"><div class="stat-label">Avg Risk Score</div><div class="stat-value" style="color:${avgRisk>=65?'var(--red)':avgRisk>=35?'var(--amber)':'var(--green)'}">${avgRisk}%</div></div>
+    <div class="stat"><div class="stat-label">High Risk</div><div class="stat-value text-danger">${high}</div><div class="stat-sub">Need immediate action</div></div>
+    <div class="stat"><div class="stat-label">Medium Risk</div><div class="stat-value text-warn">${med}</div><div class="stat-sub">Monitor closely</div></div>`;
+
+  // Table (high risk first)
+  const sorted = [...results].sort((a,b)=>b.risk-a.risk);
+  document.getElementById('batch-tbody').innerHTML = sorted.slice(0,20).map(r => {
+    const worstField = Object.entries(r.data).sort((a,b)=>(a[1]||4)-(b[1]||4))[0];
+    const fieldLabels = { pay:'Pay rate', career:'Career growth', sup_feedback:'Supervisor feedback', proper_training:'Training', recognition:'Recognition', valued:'Feeling valued' };
+    const priorityBadge = r.cat === 'HIGH' ? '<span style="color:var(--red);font-weight:700">URGENT</span>' : r.cat === 'MEDIUM' ? '<span style="color:var(--amber);font-weight:600">MODERATE</span>' : '<span style="color:var(--green)">ROUTINE</span>';
+    return `<tr>
+      <td>${r.idx}</td>
+      <td><strong>${r.id}</strong></td>
+      <td><strong>${r.risk}%</strong></td>
+      <td><span class="risk-pill ${r.cls}"><span class="dot"></span> ${r.cat}</span></td>
+      <td>${THEMES[r.worstTheme]?.icon || ''} ${r.worstTheme}</td>
+      <td>${fieldLabels[worstField?.[0]] || (worstField?.[0] || 'N/A')}</td>
+      <td>${priorityBadge}</td>
+    </tr>`;
+  }).join('');
+
+  // Aggregate theme scores
+  const avgThemeScores = {};
+  Object.keys(THEMES).forEach(theme => {
+    avgThemeScores[theme] = results.reduce((sum,r)=>sum+(r.themeScores[theme]||2.5),0)/results.length;
+  });
+  renderThemeBars('batch-theme-bars', avgThemeScores);
+
+  // Risk distribution bar chart
+  if (window.batchChart) window.batchChart.destroy();
+  const ctx = document.getElementById('risk-dist-chart').getContext('2d');
+  window.batchChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Low (<35%)', 'Medium (35–65%)', 'High (>65%)'],
+      datasets: [{
+        label: 'Employees',
+        data: [low, med, high],
+        backgroundColor: ['#1a7a4a', '#c97b00', '#d63030'],
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
+
+  // Org strategies — frequency analysis
+  const themeCounts = {};
+  results.filter(r=>r.cat!=='LOW').forEach(r => {
+    themeCounts[r.worstTheme] = (themeCounts[r.worstTheme]||0)+1;
+  });
+  const topThemes = Object.entries(themeCounts).sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]);
+  const orgStrategies = topThemes.flatMap(theme => (STRATEGIES[theme]||[]).slice(0,2).map(s=>({...s,theme})));
+
+  var orgHtml = '';
+  orgStrategies.slice(0,6).forEach(function(s, i) {
+    var effColor = s.effectiveness >= 2.5 ? '#1a7a4a' : '#c97b00';
+    var borderColor = s.priority === 1 ? '#d63030' : s.priority === 2 ? '#c97b00' : '#1a7a4a';
+    orgHtml += '<div style="border-left:4px solid ' + borderColor + ';padding:14px 16px;margin-bottom:12px;background:var(--white);border-radius:6px;border:1px solid var(--border);border-left:4px solid ' + borderColor + ';">' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
+        '<span style="font-size:12px;font-weight:700;color:var(--ink);background:var(--surface);border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;">' + (i+1) + '</span>' +
+        '<span style="background:var(--surface);border:1px solid var(--border);border-radius:100px;font-size:10px;font-weight:700;padding:3px 10px;color:var(--wydot2);">' + (THEMES[s.theme] ? THEMES[s.theme].icon : '') + ' ' + s.theme + '</span>' +
+        '<span style="font-size:10px;font-weight:700;color:' + effColor + ';">' + s.adoption + ' DOTs use this</span>' +
+      '</div>' +
+      '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">' + s.title + '</div>' +
+      '<div style="font-size:12px;color:var(--ink2);line-height:1.65;">' + s.desc + '</div>' +
+      '</div>';
+  });
+  document.getElementById('org-strategies').innerHTML = orgHtml;
+}
+
+/* ─── DASHBOARD ─── */
+function initDashboard() {
+  // Leaving reasons bars
+  const leavingReasons = [
+    { label: 'Pay/salary competitiveness', count: 17 },
+    { label: 'Better opportunities elsewhere', count: 12 },
+    { label: 'Retirement', count: 11 },
+    { label: 'Supervisor relationship', count: 6 },
+    { label: 'Lack of advancement/promotion', count: 6 },
+    { label: 'Lack of recognition / not valued', count: 2 },
+    { label: 'Workload or stress', count: 2 },
+    { label: 'Rural/urban challenges', count: 1 },
+    { label: 'Geographic / commute issues', count: 1 },
+  ];
+  const maxLR = Math.max(...leavingReasons.map(r=>r.count));
+  document.getElementById('leaving-reasons-bars').innerHTML = leavingReasons.map(r => `
+    <div class="theme-bar-row">
+      <div class="theme-bar-label" style="font-size:11px">${r.label}</div>
+      <div class="theme-bar-track"><div class="theme-bar-fill" style="width:${(r.count/maxLR*100).toFixed(1)}%;background:var(--red)"></div></div>
+      <div class="theme-bar-val">${r.count}</div>
+    </div>`).join('');
+
+  // Retention strategies bars
+  const retStrategies = [
+    { label: 'Training & professional development', count: 25 },
+    { label: 'Supervisor/leadership training', count: 23 },
+    { label: 'Flexible work arrangements', count: 21 },
+    { label: 'Variety of work assignments', count: 13 },
+    { label: 'Improved benefits', count: 12 },
+    { label: 'Recognition & appreciation programs', count: 11 },
+    { label: 'Succession planning & mentorship', count: 11 },
+    { label: 'Market competitive salaries/bonuses', count: 10 },
+    { label: 'Rural/remote location incentives', count: 9 },
+    { label: 'Clearer & faster promotion pathways', count: 7 },
+    { label: 'Knowledge management tool', count: 5 },
+  ];
+  const maxRS = Math.max(...retStrategies.map(r=>r.count));
+  document.getElementById('retention-strategy-bars').innerHTML = retStrategies.map(r => `
+    <div class="theme-bar-row">
+      <div class="theme-bar-label" style="font-size:11px">${r.label}</div>
+      <div class="theme-bar-track"><div class="theme-bar-fill" style="width:${(r.count/maxRS*100).toFixed(1)}%;background:var(--green)"></div></div>
+      <div class="theme-bar-val">${r.count}</div>
+    </div>`).join('');
+
+  // Exit survey theme RISK SIGNALS (0–3 scale, higher = more risk from that theme)
+  // Exit survey theme RISK SIGNALS — computed from actual WYDOT exit survey means (n=307)
+  // Unified 0–3 scale. Rating items (pay, career, pmi): risk = 4−mean. All others: risk = mean−1
+  // Actual item means and computed risks:
+  //   pay=1.948 → risk 2.05 | career=2.134 → 1.87 | pmi=2.264 → 1.74 | recognition(agree)=3.104 → 2.10
+  //   job_security=3.466 → 2.47 | sup_policy=3.502 → 2.50 | informed=3.218 → 2.22
+  //   safety_sup=3.436 → 2.44 | safety_culture=3.221 → 2.22
+  //   sup_comm=3.290 → 2.29 | sup_comfort=3.241 → 2.24 | sup_feedback=3.166 → 2.17
+  //   get_resources=3.322 → 2.32 | team=3.208 → 2.21 | clarity=3.192 → 2.19
+  // EXIT SURVEY scores translated to UI scale (1=Poor, 4=Excellent)
+  // Translation: ui_score = 5 - original_score (original used 1=Best, 4=Worst)
+  // pay original=3.05 → ui=1.95 (Poor); job_security original=1.53 → ui=3.47 (Good)
+  // Lower ui score = more dissatisfied = Risk Area (red/amber)
+  const exitThemes = {
+    'Compensation & Career':   2.36,  // pay=1.95,career=2.13,pmi=2.26,recognition=3.10 → avg translated
+    'Training & Development':  2.89,  // job_train=2.80,train_prog=2.75,proper_train=3.12 → avg
+    'Work Culture & Team':     3.02,  // coop_dept=3.02,coop_other=2.87,team=3.21,valued=3.02 → avg
+    'Working Conditions':      3.03,  // equipment=2.85,phys=2.83,clarity=3.19,get_resources=3.32 → avg
+    'Supervisor / Leadership': 3.13,  // all supervisor items translated avg
+    'Communication / HR':      3.15,  // hr_comfort=3.23,fairness=3.19,sup_teamwork=3.11,resolve=3.10
+    'Safety':                  3.33,  // safety_culture=3.22,safety_sup=3.44 → avg
+    'Job Security':            3.39,  // job_security=3.47,informed=3.22,sup_policy=3.50 → avg
+  };
+  renderThemeBars('exit-theme-bars', exitThemes);
+
+  // Stayer theme risk signals — computed from actual stayer means (n=300)
+  // Stayers score much lower risk on all themes (they are more satisfied/agree more with positive items)
+  // Stayer actual means: pay=3.129→risk 0.87 | career=2.861→1.14 | pmi=2.722→1.28 | recognition=1.923→0.92
+  // job_security=1.541→0.54 | sup_policy=1.457→0.46 | safety_sup=1.562→0.56 | team=1.791→0.79
+  // STAYER scores translated to UI scale (1=Poor, 4=Excellent)
+  // Stayers score higher (more satisfied) than leavers in UI framing
+  const stayerThemes = {
+    'Compensation & Career':   2.48,  // pay=2.14,career=2.26,pmi=2.23,recognition=3.30 → avg
+    'Training & Development':  3.05,  // job_train=2.96,train_prog=2.81,proper_train=3.37 → avg
+    'Work Culture & Team':     3.25,  // coop_dept=3.20,coop_other=3.05,team=3.44,valued=3.30 → avg
+    'Working Conditions':      3.24,  // equipment=3.07,phys=3.02,clarity=3.46,get_resources=3.43
+    'Supervisor / Leadership': 3.38,  // stayer supervisor items translated avg
+    'Communication / HR':      3.37,  // hr_comfort=3.38,fairness=3.44,sup_teamwork=3.36,resolve=3.29
+    'Safety':                  3.51,  // safety_culture=3.42,safety_sup=3.59 → avg
+    'Job Security':            3.60,  // job_security=3.62,informed=3.51,sup_policy=3.66 → avg
+  };
+  renderThemeBars('stayer-theme-bars', stayerThemes);
+}
+
+/* ─── CHATBOT — DUAL PROVIDER (GOOGLE GEMINI + ANTHROPIC CLAUDE) ─── */
+let chatHistory = [];
+let anthropicApiKey = localStorage.getItem('wydot_api_key') || '';
+let googleApiKey = localStorage.getItem('wydot_google_key') || '';
+let activeProvider = localStorage.getItem('wydot_provider') || 'anthropic';
+
+// Restore saved keys on load
+window.addEventListener('DOMContentLoaded', () => {
+  if (anthropicApiKey) {
+    const el = document.getElementById('api-key-input');
+    if (el) { el.value = anthropicApiKey; document.getElementById('api-key-status').textContent = '✓ Active'; }
+  }
+  if (googleApiKey) {
+    const el = document.getElementById('google-key-input');
+    if (el) { el.value = googleApiKey; document.getElementById('google-key-status').textContent = '✓ Active'; }
+  }
+});
+
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    alert('Please enter a valid Anthropic API key (starts with sk-ant-)');
+    return;
+  }
+  anthropicApiKey = key;
+  activeProvider = 'anthropic';
+  localStorage.setItem('wydot_api_key', key);
+  localStorage.setItem('wydot_provider', 'anthropic');
+  document.getElementById('api-key-status').textContent = '✓ Active — using Claude';
+  document.getElementById('google-key-status').textContent = '';
+}
+
+function saveGoogleKey() {
+  const key = document.getElementById('google-key-input').value.trim();
+  if (!key.startsWith('AIza')) {
+    alert('Please enter a valid Google AI Studio API key (starts with AIza)');
+    return;
+  }
+  googleApiKey = key;
+  activeProvider = 'google';
+  localStorage.setItem('wydot_google_key', key);
+  localStorage.setItem('wydot_provider', 'google');
+  document.getElementById('google-key-status').textContent = '✓ Active — using Gemini';
+  document.getElementById('api-key-status').textContent = '';
+}
+
+const WYDOT_SYSTEM_PROMPT = `You are the WYDOT HR Decision Support Assistant — an expert on workforce turnover, HR analytics, and retention for Wyoming DOT.
+
+CONFIRMED SCALE — ALL 32 ITEMS (Exit Survey + Stayer Profile):
+UI SCALE (1=Poor/Strongly Disagree → 4=Excellent/Strongly Agree).
+Translation layer: underlying data inverted to present this standard to users.
+Risk formula: contribution = weight × (4 - val)
+val=1 (Poor) → max risk contribution; val=4 (Excellent) → zero risk.
+val=1 → zero risk contribution; val=4 → maximum risk contribution.
+
+WYDOT EXIT SURVEY KEY FINDINGS (n=307 leavers, Exit_survey_data.xlsx):
+Item means on 1=Best, 4=Worst scale — sorted by dissatisfaction:
+- Rate of pay: 3.05 — HIGHEST dissatisfaction (close to "Strongly Disagree")
+- Career development: 2.87
+- PMI review system: 2.74
+- Training programs: 2.25
+- Cooperation within dept: 2.02
+- Valued as WYDOT member: 1.98 (closer to satisfied)
+- Supervisor comfort: 1.76 (relatively satisfied but LARGEST gap vs stayers)
+- Job security: 1.53 (low absolute score but stayers score 1.38 — small gap)
+
+THEME SCORES in UI scale (1=Poor, 4=Excellent) — LOWER score = more risk:
+1. Compensation & Career: leavers=2.36, stayers=2.48 ← LOWEST SATISFACTION (risk)
+2. Training & Development: leavers=2.89, stayers=3.05
+3. Work Culture & Team:   leavers=3.02, stayers=3.25
+4. Working Conditions:    leavers=3.03, stayers=3.24
+5. Supervisor/Leadership: leavers=3.13, stayers=3.38 (largest gap — key lever)
+6. Communication/HR:      leavers=3.15, stayers=3.37
+7. Safety:                leavers=3.33, stayers=3.51
+8. Job Security:          leavers=3.39, stayers=3.60 ← HIGHEST SATISFACTION (strength)
+
+KEY INSIGHT: Compensation/Pay has the highest absolute dissatisfaction (pay=3.05/4).
+Supervisor items have the largest leaver-vs-stayer GAPS (sup_comfort gap=0.30,
+sup_comm gap=0.28) — meaning supervisor quality is the strongest DIFFERENTIATOR
+between those who stay and those who leave, even if the absolute scores aren\'t as extreme.
+WYDOT-specific insight: Job Security and Safety have LOW absolute scores for BOTH groups
+(stayers 1.38–1.49, leavers 1.53–1.67) — these are relative strengths for WYDOT.
+
+NATIONAL DOT DATA (31 DOTs, national_dot_survey.xlsx):
+Scale is REVERSED for national data: 1=Poor/Disagree, 4=Excellent/Agree.
+Top leaving reasons: Pay/salary=17 DOTs, Better opportunities=12, Retirement=11,
+  Supervisor relationship=6, Lack of advancement=6.
+Top retention strategies: Training=25 DOTs(3.2/4 eff), Supervisor training=23(3.1),
+  Flexible work=21(3.6 — highest eff), Variety=13(3.3), Recognition=11(3.3),
+  Succession/mentorship=11(3.3), Market salaries=10(3.1), Rural incentives=9(3.0).
+
+THEME → STRATEGY MAPPING:
+- Compensation (highest abs score) → Market salary review, ArDOT C3PO internal promotion,
+  career path dashboard, PMI reform, student loan assistance
+- Training → MoDOT nuts-to-bolts tied to pay raises, CDL academy (NHDOT), cross-training
+- Culture/Team → Flexible work (3.6 eff), recognition programs, 30/60/90 check-ins
+- Working Conditions → Resource upgrades, rural incentives (CDOT housing), job clarity
+- Supervisor (largest gap — key retention lever) → Supervisor leadership training (23 DOTs),
+  MDOT Leadership Standards of Excellence, structured 1-on-1s, mentorship programs
+- Job Security & Safety (relative WYDOT strengths) → Maintain through succession planning,
+  transparent communication, and continued safety culture investment
+
+RISK THRESHOLDS: High ≥65% act within 1 week, Medium 35-64% within 30 days, Low <35% 60-day check-in.
+Be specific, practical, WYDOT-focused. Reference actual data. Use bullet points.`;
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  const hasKey = (activeProvider === 'google' && googleApiKey) ||
+                 (activeProvider === 'anthropic' && anthropicApiKey);
+  if (!hasKey) {
+    alert('Please add an API key in the AI Assistant setup panel.\n\nOption 1 (Free): Google AI Studio key from aistudio.google.com\nOption 2: Anthropic key from console.anthropic.com');
+    return;
+  }
+
+  input.value = '';
+  appendMessage('user', msg);
+  chatHistory.push({ role: 'user', content: msg });
+  const typingDiv = appendMessage('ai', '⋯ thinking');
+  typingDiv.id = 'typing-msg';
+
+  try {
+    let reply = '';
+
+    if (activeProvider === 'google' && googleApiKey) {
+      const geminiContents = [];
+      for (let i = 0; i < chatHistory.length - 1; i++) {
+        geminiContents.push({
+          role: chatHistory[i].role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: chatHistory[i].content }]
+        });
+      }
+      geminiContents.push({ role: 'user', parts: [{ text: msg }] });
+
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${googleApiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: WYDOT_SYSTEM_PROMPT }] },
+            contents: geminiContents,
+            generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
+          })
+        }
+      );
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Gemini.';
+
+    } else {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: WYDOT_SYSTEM_PROMPT,
+          messages: chatHistory
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      reply = data.content?.[0]?.text || 'No response from Claude.';
+    }
+
+    document.getElementById('typing-msg')?.remove();
+    appendMessage('ai', reply);
+    chatHistory.push({ role: 'assistant', content: reply });
+    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-18);
+
+  } catch (err) {
+    document.getElementById('typing-msg')?.remove();
+    appendMessage('ai', `Error: ${err.message}. Please check your API key and try again.`);
+  }
+}
+
+function appendMessage(role, text) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.innerHTML = `
+    <div class="msg-avatar">${role==='ai'?'W':'HR'}</div>
+    <div class="msg-bubble">${text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/•/g,'•')}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function sendQuick(msg) {
+  document.getElementById('chat-input').value = msg;
+  sendChat();
+}
+
+/* ─── DOWNLOAD TEMPLATE ─── */
+function downloadTemplate() {
+  const headers = [
+    'EmployeeID','Cooperationwithinyourdepartmentprogram','Cooperationwithotherdepartmentsprograms',
+    'Personaljobtraining','Equipmentprovidedmaterialsresourcesfacilities','WYDOTsperformancereviewsystemPMI',
+    'Trainingprograms','Rateofpayforyourjob','Careerdevelopmentadvancementopportunities',
+    'Physicalworkingconditions','getresources','IbelievethatIwastreatedasavaluablememberofWYDOT',
+    'MyimmediatesupervisorletmeknowwhenIwasdoinga3job','Ifeltfreetosuggesttomysupervisorchangesthatwouldimprovemydepartm',
+    'Ireceivedthepropertraininginordertoperformmyjobeffectively','Employeeproblemsandcomplaintswereresolved2lyandpromptlyinmydepar',
+    'IfIhadquestionsorconcernsIfeltcomfortablespeakingwithmyimmediate','IfIhadquestionsorconcernsIfeltcomfortablespeakingwithuppermanage',
+    'IfIhadquestionsorconcernsIfeltcomfortablespeakingwithHumanResour','Iwaskeptwellinformedaboutmydepartmentspoliciesandproceduresandot',
+    'IfeltthatWYDOTprovidedmewithjobsecurity','Membersofmyteamworkedwelltogether','IfeltWYDOTsupportedacultureofsafety',
+    'Myjobdutiesandresponsibilitieswereclearlydefined','Providedrecognition','Resolvedcomplaintsampproblems',
+    'Wassensitivetoemployeesneeds','Providedfeedbackonperformance','Wasreceptivetoopencommunication',
+    'FollowedWYDOTpolicies','Demonstrated2ampequaltreatment','Developedcooperationampteamwork','Providedanenvironmentofsafety'
+  ];
+  const sampleRows = [
+    ['EMP-001', 3,2,2,3,3,3,1,1,3,3,4,1,2,4,3,2,3,3,2,4,3,3,4,1,2,3,2,2,2,2,1,2],
+    ['EMP-002', 2,2,2,1,1,1,1,1,2,2,2,2,1,2,1,1,2,2,2,4,2,1,2,2,1,2,2,1,2,2,1,2]
+  ];
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...sampleRows]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'PulseSurvey');
+  XLSX.writeFile(wb, 'WYDOT_PulseSurvey_Template.xlsx');
+  return false;
+}
+
+/* ─── OVERLAY HELPERS ─── */
+function showOverlay(msg) {
+  document.getElementById('overlay-text').textContent = msg || 'Processing...';
+  document.getElementById('overlay').classList.add('show');
+}
+function hideOverlay() {
+  document.getElementById('overlay').classList.remove('show');
+}
+
+/* ─── DRAG & DROP ─── */
+const uploadZone = document.getElementById('upload-zone');
+if (uploadZone) {
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault(); uploadZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      const dt = new DataTransfer(); dt.items.add(file);
+      document.getElementById('file-input').files = dt.files;
+      handleFileUpload(document.getElementById('file-input'));
+    }
+  });
+}
+</script>
+</body>
+</html>
